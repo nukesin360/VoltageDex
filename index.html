@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltage — Pokédex &amp; Team Strategist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0a10; --bg-alt: #100e17; --surface: #16131e; --surface-2: #1c1826;
+    --border: #2a2436; --border-bright: #3d3450; --purple: #9b6dff; --purple-dim: #7c5cd6;
+    --purple-glow: rgba(155,109,255,0.35); --lavender: #a89cc8; --text: #ece8f5; --text-dim: #8d859f;
+    --amber: #ffb454; --red: #ff6b6b; --green: #6ee7a8; --radius: 14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh;}
+  body{
+    background: radial-gradient(ellipse 900px 500px at 15% -10%, rgba(155,109,255,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(124,92,214,0.08), transparent 55%), var(--bg);
+    background-attachment: fixed;
+  }
+  ::selection{ background: var(--purple-glow); }
+  a{color:inherit;} button{font-family:inherit;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg-alt);}
+  ::-webkit-scrollbar-thumb{background:var(--border-bright); border-radius:6px;}
+
+  .wrap{max-width:1140px; margin:0 auto; padding:0 24px 80px;}
+  header.top{ padding:36px 24px 20px; display:flex; align-items:center; justify-content:space-between; max-width:1140px; margin:0 auto; flex-wrap:wrap; gap:16px; position:relative; overflow:hidden; }
+  .header-mascot{ position:absolute; right:0; top:-46px; width:170px; opacity:0.14; filter:brightness(0) invert(48%) sepia(70%) saturate(3000%) hue-rotate(232deg); pointer-events:none; user-select:none; }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:38px; height:38px; border-radius:10px; background: conic-gradient(from 200deg, var(--purple), #4a3a72, var(--purple)); box-shadow: 0 0 22px var(--purple-glow); position:relative; flex-shrink:0; }
+  .brand-mark::after{ content:""; position:absolute; inset:12px; border-radius:50%; background:var(--bg); border:2px solid var(--surface); }
+  .brand h1{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; letter-spacing:0.02em; }
+  .brand span{color:var(--purple);}
+  .brand small{display:block; font-size:11px; color:var(--text-dim); font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-top:2px;}
+  nav.tabs{ display:flex; gap:4px; background:var(--surface); padding:4px; border-radius:12px; border:1px solid var(--border); }
+  nav.tabs button{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; padding:10px 18px; border-radius:9px; border:none; cursor:pointer; background:transparent; color:var(--text-dim); letter-spacing:0.01em; transition:all .18s ease; }
+  nav.tabs button.active{ background:var(--surface-2); color:var(--text); box-shadow: inset 0 0 0 1px var(--border-bright), 0 0 14px rgba(155,109,255,0.12);}
+  nav.tabs button:hover:not(.active){ color:var(--lavender); }
+  .view{display:none;} .view.active{display:block;}
+
+  .search-hero{ text-align:center; padding:26px 24px 8px; }
+  .search-hero h2{ font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700; line-height:1.15; margin-bottom:10px; }
+  .search-hero p{ color:var(--text-dim); font-size:15px; margin-bottom:26px; }
+  .search-box{ max-width:480px; margin:0 auto; display:flex; gap:8px; position:relative; }
+  .search-box input{ flex:1; padding:15px 18px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:15px; font-family:'Inter',sans-serif; outline:none; transition:border-color .15s, box-shadow .15s; }
+  .search-box input:focus{ border-color:var(--purple-dim); box-shadow:0 0 0 3px var(--purple-glow); }
+  .search-box input::placeholder{ color:var(--text-dim); }
+  .search-box button{ padding:0 22px; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--purple), var(--purple-dim)); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; box-shadow:0 4px 18px var(--purple-glow); transition:transform .12s; }
+  .search-box button:hover{ transform:translateY(-1px); }
+  .quick-picks{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .chip{ font-size:12px; padding:6px 12px; border-radius:100px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); cursor:pointer; transition:all .15s; font-family:'JetBrains Mono',monospace; }
+  .chip:hover{ border-color:var(--purple-dim); color:var(--lavender); }
+  .chip.suggest{ border-color:var(--purple-dim); color:var(--purple); background:rgba(155,109,255,0.08); }
+
+  .status-msg{ text-align:center; padding:40px 20px; color:var(--text-dim); font-size:14px; }
+  .status-msg.error{ color:var(--red); }
+  .spinner{ width:26px; height:26px; margin:0 auto 14px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--purple); animation:spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  #results{ margin-top:26px; }
+  .poke-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; animation:fadein .35s ease; }
+  .poke-head{ display:flex; gap:28px; padding:28px; align-items:center; flex-wrap:wrap; background: radial-gradient(ellipse 400px 240px at 85% 0%, rgba(155,109,255,0.14), transparent 70%), var(--surface-2); border-bottom:1px solid var(--border); }
+  .poke-art{ width:150px; height:150px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, rgba(155,109,255,0.10), transparent 70%); border-radius:16px; }
+  .poke-art img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 20px rgba(0,0,0,0.5)); }
+  .poke-meta{ flex:1; min-width:220px; }
+  .dex-num{ font-family:'JetBrains Mono',monospace; color:var(--purple); font-size:13px; font-weight:700; letter-spacing:0.05em; }
+  .poke-name{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; margin:4px 0 10px; }
+  .type-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .type-badge{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:5px 12px; border-radius:100px; color:#fff; }
+  .region-tag{ font-size:12.5px; color:var(--text-dim); }
+  .region-tag b{ color:var(--lavender); font-weight:600; }
+  .form-select{ display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+  .form-btn{ font-size:11.5px; font-family:'JetBrains Mono',monospace; padding:6px 11px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); cursor:pointer; }
+  .form-btn.active{ border-color:var(--purple-dim); color:var(--purple); background:rgba(155,109,255,0.08); }
+  .stat-block{ min-width:230px; display:flex; flex-direction:column; gap:7px; }
+  .stat-row{ display:grid; grid-template-columns:64px 1fr 32px; align-items:center; gap:10px; }
+  .stat-row .stat-label{ font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; }
+  .stat-row .stat-val{ font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--lavender); text-align:right; }
+  .stat-bar-track{ height:6px; border-radius:4px; background:var(--bg-alt); overflow:hidden; }
+  .stat-bar-fill{ height:100%; border-radius:4px; background:linear-gradient(90deg, var(--purple-dim), var(--purple)); }
+
+  .section-tabs{ display:flex; gap:2px; padding:0 28px; border-bottom:1px solid var(--border); background:var(--bg-alt); overflow-x:auto; }
+  .section-tabs button{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; white-space:nowrap; padding:14px 16px; border:none; background:transparent; color:var(--text-dim); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .section-tabs button.active{ color:var(--purple); border-bottom-color:var(--purple); }
+  .section-body{ padding:26px 28px 30px; }
+  .section-pane{ display:none; } .section-pane.active{ display:block; animation:fadein .25s ease; }
+
+  .weak-grid-title{ font-size:12px; color:var(--text-dim); margin-bottom:12px; }
+  .eff-groups{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .eff-group h4{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:8px; font-family:'Space Grotesk',sans-serif;}
+  .eff-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .eff-chip{ display:flex; align-items:center; gap:6px; font-size:12px; padding:4px 10px 4px 4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); }
+  .eff-chip small{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); }
+
+  .move-tabs{ display:flex; gap:6px; margin-bottom:14px; }
+  .move-tabs button{ font-size:11.5px; font-family:'JetBrains Mono',monospace; padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-dim); cursor:pointer; }
+  .move-tabs button.active{ border-color:var(--purple-dim); color:var(--purple); }
+  table.move-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.move-table th{ text-align:left; color:var(--text-dim); font-weight:600; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; padding:6px 10px; border-bottom:1px solid var(--border); }
+  table.move-table td{ padding:7px 10px; border-bottom:1px solid var(--border); }
+  table.move-table tr:hover td{ background:rgba(155,109,255,0.04); }
+  .move-name{ font-weight:500; }
+  table.move-table td.col-cat, table.move-table td.col-pow, table.move-table td.col-acc{ font-size:11px; color:var(--lavender); white-space:nowrap; }
+  table.move-table td.col-effect{ font-size:11px; color:var(--text-dim); max-width:280px; line-height:1.4; }
+  .move-scroll{ max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; }
+
+  .evo-tree{ display:flex; align-items:center; overflow-x:auto; padding-bottom:6px; }
+  .evo-branch-item{ display:flex; align-items:center; gap:8px; }
+  .evo-branch-group{ display:flex; flex-direction:column; gap:14px; }
+  .evo-chain-inline{ display:flex; align-items:center; gap:8px; }
+  .evo-node{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); min-width:110px; text-align:center; cursor:pointer; transition:border-color .15s;}
+  .evo-node:hover{ border-color:var(--purple-dim); }
+  .evo-node img{ width:64px; height:64px; }
+  .evo-node span{ font-size:12px; font-weight:600; }
+  .evo-arrow{ display:flex; flex-direction:column; align-items:center; color:var(--text-dim); font-size:10px; padding:0 6px; font-family:'JetBrains Mono',monospace; gap:2px; max-width:110px; text-align:center; line-height:1.3;}
+  .evo-arrow .arr{ font-size:16px; color:var(--purple); }
+
+  .forms-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; }
+  .form-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center; }
+  .form-card img{ width:70px; height:70px; margin-bottom:6px; }
+  .form-card span{ font-size:11.5px; color:var(--lavender); }
+
+  .sets-toolbar{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+  .format-select{ padding:8px 12px; border-radius:9px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:12.5px; font-family:'JetBrains Mono',monospace; }
+  .regen-btn{ font-size:12px; padding:8px 14px; border-radius:9px; border:1px solid var(--border-bright); background:var(--surface-2); color:var(--purple); cursor:pointer; font-weight:600; }
+  .sets-section-title{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--lavender); margin:18px 0 10px; text-transform:uppercase; letter-spacing:0.05em; }
+  .sets-section-title:first-child{ margin-top:0; }
+  .sets-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+  .set-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .set-card.mega{ border-color:rgba(255,180,84,0.4); }
+  .set-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; }
+  .set-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; }
+  .set-form-tag{ font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; display:block; margin-top:2px;}
+  .set-tags{ display:flex; flex-direction:column; gap:4px; align-items:flex-end; }
+  .set-tag{ font-size:9px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; padding:3px 8px; border-radius:100px; flex-shrink:0; white-space:nowrap;}
+  .set-tag.smogon{ background:rgba(155,109,255,0.18); color:var(--purple); }
+  .set-tag.generated{ background:rgba(141,133,159,0.18); color:var(--text-dim); }
+  .set-tag.mega{ background:rgba(255,180,84,0.18); color:var(--amber); }
+  .set-line{ font-size:12px; color:var(--lavender); margin-bottom:4px; }
+  .set-line b{ color:var(--text); font-weight:600; }
+  .set-moves{ margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .set-move{ font-size:11.5px; background:var(--bg-alt); border:1px solid var(--border); border-radius:7px; padding:5px 8px; }
+  .set-evs{ margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+  .ev-pill{ font-size:10px; font-family:'JetBrains Mono',monospace; background:var(--bg-alt); border:1px solid var(--border); border-radius:6px; padding:3px 7px; color:var(--lavender); }
+  .fallback-note{ font-size:12px; color:var(--amber); margin-bottom:14px; background:rgba(255,180,84,0.08); border:1px solid rgba(255,180,84,0.25); border-radius:8px; padding:10px 12px;}
+
+  .tb-layout{ display:grid; grid-template-columns:340px 1fr; gap:22px; margin-top:20px; align-items:start; }
+  @media (max-width:860px){ .tb-layout{ grid-template-columns:1fr; } }
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+  .panel h3{ font-family:'Space Grotesk',sans-serif; font-size:15px; margin-bottom:4px; }
+  .panel .sub{ font-size:12px; color:var(--text-dim); margin-bottom:16px; }
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:11.5px; font-weight:600; color:var(--lavender); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; }
+  .field input[type=text]{ width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:14px; outline:none; }
+  .field input:focus{ border-color:var(--purple-dim); }
+  .radio-row, .check-row{ display:flex; flex-direction:column; gap:8px; }
+  .radio-opt, .check-opt{ display:flex; align-items:center; gap:9px; font-size:13px; color:var(--text); cursor:pointer; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); }
+  .radio-opt:has(input:checked), .check-opt:has(input:checked){ border-color:var(--purple-dim); background:rgba(155,109,255,0.07); }
+  .radio-opt input, .check-opt input{ accent-color:var(--purple); }
+  .type-pill-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .type-pill{ font-size:10.5px; padding:6px 4px; text-align:center; border-radius:7px; cursor:pointer; border:1px solid var(--border); color:#fff; opacity:0.45; font-family:'Space Grotesk',sans-serif; font-weight:700; text-transform:uppercase; user-select:none; }
+  .type-pill.on{ opacity:1; box-shadow:0 0 0 2px var(--purple-glow); }
+  .build-btn{ width:100%; padding:14px; border-radius:11px; border:none; cursor:pointer; margin-top:6px; background:linear-gradient(135deg, var(--purple), var(--purple-dim)); color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; box-shadow:0 6px 22px var(--purple-glow); }
+  select.plain{ width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:13px; }
+  .seed-forms-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .extra-seed-row{ display:flex; gap:6px; margin-top:8px; }
+  .extra-seed-row input{ flex:1; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:14px; outline:none; }
+  .extra-seed-row input:focus{ border-color:var(--purple-dim); }
+  .extra-seed-row .remove-seed{ padding:0 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--red); cursor:pointer; font-size:13px; }
+
+  .tb-results{ display:flex; flex-direction:column; gap:16px; }
+  .tb-status{ text-align:center; padding:60px 20px; color:var(--text-dim); }
+  .team-acc{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .team-acc-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 22px; cursor:pointer; flex-wrap:wrap; }
+  .team-acc-head:hover{ background:var(--surface-2); }
+  .team-acc-title{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .team-acc-num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--purple); border:1px solid var(--purple-dim); border-radius:100px; padding:3px 9px; }
+  .team-acc-title h4{ font-family:'Space Grotesk',sans-serif; font-size:16px; }
+  .team-acc-mini-icons{ display:flex; }
+  .team-acc-mini-icons img{ width:34px; height:34px; margin-left:-10px; border-radius:50%; background:var(--bg-alt); border:2px solid var(--surface); }
+  .team-acc-toggle{ font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; }
+  .team-acc-body{ display:none; border-top:1px solid var(--border); padding:22px; }
+  .team-acc-body.open{ display:block; animation:fadein .25s ease; }
+
+  .strategy-card{ background:linear-gradient(135deg, rgba(155,109,255,0.10), rgba(155,109,255,0.02)); border:1px solid var(--border-bright); border-radius:var(--radius); padding:22px; margin-bottom:18px; }
+  .strategy-eyebrow{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--purple); font-weight:700; margin-bottom:6px; }
+  .strategy-title{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; margin-bottom:10px; }
+  .strategy-desc{ font-size:14px; color:var(--lavender); line-height:1.6; margin-bottom:6px; }
+  .strategy-why{ font-size:13px; color:var(--text); line-height:1.6; margin-bottom:14px; padding:12px 14px; background:var(--surface-2); border-radius:10px; border:1px solid var(--border);}
+  .strategy-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  @media (max-width:520px){ .strategy-grid{ grid-template-columns:1fr; } }
+  .strategy-item{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .strategy-item h5{ font-size:10.5px; text-transform:uppercase; color:var(--text-dim); letter-spacing:0.05em; margin-bottom:5px; }
+  .strategy-item p{ font-size:13px; color:var(--text); line-height:1.5; }
+  .gameplan{ margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media (max-width:640px){ .gameplan{ grid-template-columns:1fr; } }
+  .gameplan div{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .gameplan h6{ font-size:10px; text-transform:uppercase; color:var(--purple); letter-spacing:0.06em; margin-bottom:4px; }
+  .gameplan p{ font-size:12.5px; color:var(--lavender); line-height:1.5; }
+
+  .team-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  .team-mon{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; position:relative; cursor:pointer; transition:border-color .15s; }
+  .team-mon:hover{ border-color:var(--purple-dim); }
+  .team-mon.seed{ border-color:var(--purple-dim); box-shadow:0 0 0 1px var(--purple-dim); }
+  .team-mon.expanded{ border-color:var(--purple); }
+  .team-mon .seed-tag{ position:absolute; top:8px; right:8px; font-size:9px; background:var(--purple); color:#fff; padding:2px 6px; border-radius:100px; font-weight:700; }
+  .team-mon img{ width:64px; height:64px; }
+  .team-mon .n{ font-size:12.5px; font-weight:600; margin-top:4px; }
+  .team-mon .t{ display:flex; gap:4px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
+  .team-mon .role{ font-size:9.5px; color:var(--text-dim); margin-top:4px; font-family:'JetBrains Mono',monospace; }
+  .team-mon .rationale{ font-size:10px; color:var(--text-dim); margin-top:6px; line-height:1.4; }
+  .mon-set-detail{ grid-column:1/-1; background:var(--bg-alt); border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:2px; text-align:left; }
+
+  .coverage-panel{ background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:20px; overflow-x:auto; margin-top:18px; }
+  .coverage-panel h3{ font-family:'Space Grotesk',sans-serif; font-size:14px; margin-bottom:2px; }
+  .coverage-panel .sub{ font-size:11.5px; color:var(--text-dim); margin-bottom:14px; }
+  table.cov-table{ border-collapse:collapse; font-size:10.5px; min-width:640px; }
+  table.cov-table th, table.cov-table td{ padding:6px; text-align:center; }
+  table.cov-table th.row-h{ text-align:left; font-weight:600; padding-right:12px; white-space:nowrap; font-size:11.5px;}
+  table.cov-table th.col-h{ font-size:9px; text-transform:uppercase; color:#fff; border-radius:6px 6px 0 0; padding:6px 4px; writing-mode:vertical-rl; transform:rotate(180deg); height:60px; }
+  .cov-cell{ width:30px; height:26px; border-radius:5px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .cov-legend{ display:flex; gap:14px; margin-top:14px; flex-wrap:wrap; font-size:11px; color:var(--text-dim); }
+  .cov-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .cov-swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+  /* ===== TOOLS ===== */
+  .tools-subtabs{ display:flex; gap:4px; background:var(--surface); padding:4px; border-radius:12px; border:1px solid var(--border); max-width:fit-content; margin:24px auto 0; flex-wrap:wrap; justify-content:center;}
+  .tools-subtabs button{ font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600; padding:9px 16px; border-radius:9px; border:none; cursor:pointer; background:transparent; color:var(--text-dim); }
+  .tools-subtabs button.active{ background:var(--surface-2); color:var(--purple); }
+  .tool-pane{ display:none; margin-top:22px; } .tool-pane.active{ display:block; animation:fadein .25s ease; }
+  .tool-panel-box{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; overflow-x:auto; }
+  table.type-matrix{ border-collapse:collapse; font-size:10px; min-width:760px; }
+  table.type-matrix th, table.type-matrix td{ padding:5px; text-align:center; }
+  table.type-matrix th.corner{ background:transparent; }
+  table.type-matrix th.col-h{ font-size:9px; text-transform:uppercase; color:#fff; border-radius:5px 5px 0 0; padding:6px 3px; writing-mode:vertical-rl; transform:rotate(180deg); height:56px; }
+  table.type-matrix th.row-h{ text-align:right; padding-right:10px; font-size:11px; font-weight:700; color:#fff; border-radius:5px 0 0 5px; white-space:nowrap; }
+  .matrix-cell{ width:28px; height:24px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:10px; }
+  .matrix-note{ font-size:12px; color:var(--text-dim); margin-bottom:16px; }
+
+  table.nature-grid{ border-collapse:collapse; margin:0 auto; }
+  table.nature-grid th, table.nature-grid td{ padding:12px 16px; text-align:center; border:1px solid var(--border); }
+  table.nature-grid th{ font-family:'Space Grotesk',sans-serif; font-size:11px; text-transform:uppercase; color:var(--purple); background:var(--surface-2); }
+  table.nature-grid th.corner{ background:var(--bg-alt); }
+  .nature-cell{ font-size:13px; font-weight:600; }
+  .nature-cell.neutral{ color:var(--text-dim); font-style:italic; font-weight:400; }
+  .nature-axis-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
+
+  .tool-search{ width:100%; max-width:420px; padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:14px; outline:none; margin-bottom:18px; }
+  .tool-search:focus{ border-color:var(--purple-dim); }
+  .list-scroll{ max-height:560px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+  .list-row{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:13px 16px; cursor:pointer; }
+  .list-row:hover{ border-color:var(--purple-dim); }
+  .list-row-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .list-row-head b{ font-size:13.5px; font-weight:600; }
+  .list-row-head span.cat{ font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; }
+  .list-row-detail{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); font-size:12.5px; color:var(--lavender); line-height:1.6; }
+  .pokemon-chip-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .pokemon-chip{ font-size:11px; padding:4px 10px; border-radius:100px; background:var(--bg-alt); border:1px solid var(--border); color:var(--text); }
+  .pokemon-chip.hidden-ab{ border-color:var(--amber); color:var(--amber); }
+  .ability-legend{ font-size:11px; color:var(--text-dim); margin-top:8px; }
+
+  footer{ text-align:center; padding:40px 24px; color:var(--text-dim); font-size:12px; }
+  footer b{ color:var(--lavender); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img class="header-mascot" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/479.png" alt="" aria-hidden="true">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div><h1>VOLT<span>AGE</span></h1><small>Pokédex &amp; Team Strategist</small></div>
+  </div>
+  <nav class="tabs">
+    <button class="active" data-view="search-view">Pokédex</button>
+    <button data-view="team-view">Team Builder</button>
+    <button data-view="tools-view">Tools</button>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ SEARCH VIEW ============ -->
+  <section id="search-view" class="view active">
+    <div class="search-hero">
+      <h2>Look up any Pokémon.</h2>
+      <p>Stats, type matchups, movepools, evolutions, alternate forms, and real Smogon sets.</p>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search by name or Dex number…" autocomplete="off">
+        <button id="searchBtn">Search</button>
+      </div>
+      <div class="quick-picks" id="quickPicks"></div>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <!-- ============ TEAM BUILDER VIEW ============ -->
+  <section id="team-view" class="view">
+    <div class="search-hero" style="padding-bottom:0;">
+      <h2>Build around a Pokémon.</h2>
+      <p>Give me one you like — I will draft three genuinely different, Smogon-grounded squads with full sets and a game plan for each.</p>
+    </div>
+    <div class="tb-layout">
+      <div class="panel">
+        <h3>Team settings</h3>
+        <div class="sub">Tune the rules, then generate three drafts.</div>
+        <div class="field">
+          <label>Seed Pokémon</label>
+          <input type="text" id="seedInput" placeholder="e.g. Garchomp">
+          <div class="seed-forms-row" id="seedFormsRow"></div>
+          <div id="extraSeedsRow"></div>
+          <button type="button" class="regen-btn" id="addSeedBtn" style="margin-top:8px; width:100%;">+ Add another seed</button>
+        </div>
+        <div class="field">
+          <label>Counter a type combo (optional)</label>
+          <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Pick the type(s) you expect to face — picks are weighted to resist and hit them hard.</div>
+          <div class="type-pill-grid" id="targetTypes"></div>
+        </div>
+        <div class="field">
+          <label>Format</label>
+          <select id="formatSelect" class="plain"></select>
+        </div>
+        <div class="field">
+          <label>Ruleset</label>
+          <div class="radio-row" id="rulesetRow">
+            <label class="radio-opt"><input type="radio" name="ruleset" value="none" checked> None — just legal team building</label>
+            <label class="radio-opt"><input type="radio" name="ruleset" value="standard"> Standard (no legendaries)</label>
+            <label class="radio-opt"><input type="radio" name="ruleset" value="open"> Legendaries encouraged</label>
+            <label class="radio-opt"><input type="radio" name="ruleset" value="custom"> Custom rules</label>
+          </div>
+        </div>
+        <div class="field" id="customRulesBlock" style="display:none;">
+          <label>Custom constraints</label>
+          <div class="check-row" style="margin-bottom:10px;">
+            <label class="check-opt"><input type="checkbox" id="ruleNoLegendary" checked> No legendaries / mythicals</label>
+            <label class="check-opt"><input type="checkbox" id="ruleMonoType"> Mono-type team (match seed's primary type)</label>
+          </div>
+          <label style="font-size:11px; color:var(--text-dim); display:block; margin-bottom:6px;">Require at least one of these types on the team</label>
+          <div class="type-pill-grid" id="requiredTypes"></div>
+        </div>
+        <button class="build-btn" id="buildBtn">Draft 3 teams</button>
+      </div>
+      <div class="tb-results" id="tbResults">
+        <div class="tb-status">Set your seed Pokémon, format, and rules, then draft teams to see strategy, rosters, sets, and type coverage here.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOOLS VIEW ============ -->
+  <section id="tools-view" class="view">
+    <div class="search-hero" style="padding-bottom:0;">
+      <h2>Reference tools.</h2>
+      <p>Type chart, nature chart, items, and abilities — all in one place.</p>
+    </div>
+    <div class="tools-subtabs">
+      <button class="active" data-tool="tool-types">Type Chart</button>
+      <button data-tool="tool-natures">Natures</button>
+      <button data-tool="tool-items">Items</button>
+      <button data-tool="tool-abilities">Abilities</button>
+    </div>
+
+    <div class="tool-pane active" id="tool-types">
+      <div class="tool-panel-box">
+        <div class="matrix-note">Rows attack, columns defend. Read: row type attacking a column type.</div>
+        <div id="typeMatrixContainer"></div>
+      </div>
+    </div>
+
+    <div class="tool-pane" id="tool-natures">
+      <div class="tool-panel-box">
+        <div class="matrix-note">Rows show the boosted stat, columns show the lowered stat. The diagonal natures are neutral (no change).</div>
+        <div id="natureGridContainer" style="overflow-x:auto;"></div>
+      </div>
+    </div>
+
+    <div class="tool-pane" id="tool-items">
+      <div class="tool-panel-box">
+        <input type="text" class="tool-search" id="itemSearch" placeholder="Search items…">
+        <div class="list-scroll" id="itemList"><div class="status-msg"><div class="spinner"></div>Loading item list…</div></div>
+      </div>
+    </div>
+
+    <div class="tool-pane" id="tool-abilities">
+      <div class="tool-panel-box">
+        <input type="text" class="tool-search" id="abilitySearch" placeholder="Search abilities…">
+        <div class="ability-legend"><span style="color:var(--amber)">●</span> amber-outlined Pokémon have it as a Hidden Ability</div>
+        <div class="list-scroll" id="abilityList" style="margin-top:10px;"><div class="status-msg"><div class="spinner"></div>Loading ability list…</div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>Data from <b>PokeAPI</b> &amp; <b>Smogon</b> (via data.pkmn.cc). Built for trainers who overthink their type charts.</footer>
+
+<script>
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+const TYPE_COLORS = {
+  normal:'#9a9a72', fire:'#e8642c', water:'#4f8fef', electric:'#f0c93d', grass:'#5cb85c',
+  ice:'#6fd4e0', fighting:'#c0392b', poison:'#a259b5', ground:'#c8934a', flying:'#8fa5e8',
+  psychic:'#f26fa0', bug:'#9bb92f', rock:'#b8a45a', ghost:'#6a5aad', dragon:'#6c56e0',
+  dark:'#5a4a42', steel:'#8f9bab', fairy:'#ee9dcf'
+};
+const ALL_TYPES = Object.keys(TYPE_COLORS);
+
+const TYPE_CHART = {
+  normal:{rock:0.5, ghost:0, steel:0.5},
+  fire:{fire:0.5, water:0.5, grass:2, ice:2, bug:2, rock:0.5, dragon:0.5, steel:2},
+  water:{fire:2, water:0.5, grass:0.5, ground:2, rock:2, dragon:0.5},
+  electric:{water:2, electric:0.5, grass:0.5, ground:0, flying:2, dragon:0.5},
+  grass:{fire:0.5, water:2, grass:0.5, poison:0.5, ground:2, flying:0.5, bug:0.5, rock:2, dragon:0.5, steel:0.5},
+  ice:{fire:0.5, water:0.5, grass:2, ice:0.5, ground:2, flying:2, dragon:2, steel:0.5},
+  fighting:{normal:2, ice:2, poison:0.5, flying:0.5, psychic:0.5, bug:0.5, rock:2, ghost:0, dark:2, steel:2, fairy:0.5},
+  poison:{grass:2, poison:0.5, ground:0.5, rock:0.5, ghost:0.5, steel:0, fairy:2},
+  ground:{fire:2, electric:2, grass:0.5, poison:2, flying:0, bug:0.5, rock:2, steel:2},
+  flying:{electric:0.5, grass:2, fighting:2, bug:2, rock:0.5, steel:0.5},
+  psychic:{fighting:2, poison:2, psychic:0.5, dark:0, steel:0.5},
+  bug:{fire:0.5, grass:2, fighting:0.5, poison:0.5, flying:0.5, psychic:2, ghost:0.5, dark:2, steel:0.5, fairy:0.5},
+  rock:{fire:2, ice:2, fighting:0.5, ground:0.5, flying:2, bug:2, steel:0.5},
+  ghost:{normal:0, psychic:2, ghost:2, dark:0.5},
+  dragon:{dragon:2, steel:0.5, fairy:0},
+  dark:{fighting:0.5, psychic:2, ghost:2, dark:0.5, fairy:0.5},
+  steel:{fire:0.5, water:0.5, electric:0.5, ice:2, rock:2, steel:0.5, fairy:2},
+  fairy:{fire:0.5, fighting:2, poison:0.5, dragon:2, dark:2, steel:0.5}
+};
+function multiplier(attackType, defType){ const row = TYPE_CHART[attackType]; if(!row || !(defType in row)) return 1; return row[defType]; }
+function defenseMultiplier(defTypes, attackType){ return defTypes.reduce((m,t)=> m*multiplier(attackType,t), 1); }
+
+const REGION_BY_GEN = {
+  'generation-i':'Kanto','generation-ii':'Johto','generation-iii':'Hoenn','generation-iv':'Sinnoh',
+  'generation-v':'Unova','generation-vi':'Kalos','generation-vii':'Alola','generation-viii':'Galar','generation-ix':'Paldea'
+};
+
+const LEGENDARY_SET = new Set([
+"mewtwo","mew","articuno","zapdos","moltres","raikou","entei","suicune","lugia","ho-oh","celebi",
+"regirock","regice","registeel","latias","latios","kyogre","groudon","rayquaza","jirachi","deoxys",
+"dialga","palkia","giratina","heatran","regigigas","cresselia","manaphy","darkrai","shaymin","arceus",
+"zekrom","reshiram","kyurem","victini","keldeo","meloetta","genesect","xerneas","yveltal","zygarde",
+"diancie","hoopa","volcanion","solgaleo","lunala","necrozma","magearna","marshadow","zeraora","zacian",
+"zamazenta","eternatus","urshifu","calyrex","koraidon","miraidon","terapagos","ogerpon","pecharunt",
+"great-tusk","scream-tail","brute-bonnet","flutter-mane","slither-wing","sandy-shocks","iron-treads",
+"iron-bundle","iron-hands","iron-jugulis","iron-moth","iron-thorns","roaring-moon","iron-valiant",
+"walking-wake","iron-leaves","gouging-fire","raging-bolt","iron-boulder","iron-crown"
+]);
+
+const HAZARD_MOVES = new Set(["stealth-rock","spikes","toxic-spikes","sticky-web"]);
+const SWEEP_MOVES = new Set(["swords-dance","dragon-dance","nasty-plot","shell-smash","calm-mind","quiver-dance","curse","bulk-up","clangorous-soul"]);
+const RECOVERY_MOVES = new Set(["recover","roost","wish","soft-boiled","moonlight","synthesis","slack-off","milk-drink","morning-sun","strength-sap","rest"]);
+const WEATHER_MOVE_TITLES = { 'sunny-day':'Sun Offense', 'rain-dance':'Rain Offense', 'sandstorm':'Sand Balance', 'hail':'Snow Balance', 'snowscape':'Snow Balance' };
+const DOUBLES_SUPPORT_MOVES = new Set(["protect","follow-me","rage-powder","wide-guard","quick-guard","helping-hand","coaching","ally-switch","tailwind"]);
+const SCREENS_MOVES = new Set(["reflect","light-screen","aurora-veil"]);
+const TRICKROOM_MOVES = new Set(["trick-room"]);
+const PIVOT_MOVES = new Set(["u-turn","volt-switch","flip-turn","baton-pass","teleport","parting-shot","shed-tail"]);
+const PERISH_MOVES = new Set(["perish-song"]);
+const TRAP_MOVES = new Set(["mean-look","block","spider-web","whirlpool","fire-spin","sand-tomb"]);
+
+const MEGA_STONE_MAP = {
+  'venusaur-mega':'Venusaurite','charizard-mega-x':'Charizardite X','charizard-mega-y':'Charizardite Y',
+  'blastoise-mega':'Blastoisinite','beedrill-mega':'Beedrillite','pidgeot-mega':'Pidgeotite',
+  'alakazam-mega':'Alakazamite','slowbro-mega':'Slowbronite','gengar-mega':'Gengarite',
+  'kangaskhan-mega':'Kangaskhanite','pinsir-mega':'Pinsirite','gyarados-mega':'Gyaradosite',
+  'aerodactyl-mega':'Aerodactylite','mewtwo-mega-x':'Mewtwonite X','mewtwo-mega-y':'Mewtwonite Y',
+  'ampharos-mega':'Ampharosite','scizor-mega':'Scizorite','heracross-mega':'Heracronite',
+  'houndoom-mega':'Houndoominite','tyranitar-mega':'Tyranitarite','sceptile-mega':'Sceptilite',
+  'blaziken-mega':'Blazikenite','swampert-mega':'Swampertite','gardevoir-mega':'Gardevoirite',
+  'sableye-mega':'Sablenite','mawile-mega':'Mawilite','aggron-mega':'Aggronite',
+  'medicham-mega':'Medichamite','manectric-mega':'Manectite','sharpedo-mega':'Sharpedonite',
+  'camerupt-mega':'Cameruptite','altaria-mega':'Altarianite','banette-mega':'Banettite',
+  'absol-mega':'Absolite','glalie-mega':'Glalitite','salamence-mega':'Salamencite',
+  'metagross-mega':'Metagrossite','latias-mega':'Latiasite','latios-mega':'Latiosite',
+  'rayquaza-mega':'None — Mega Evolves via Dragon Ascent, no item needed',
+  'lopunny-mega':'Lopunnite','garchomp-mega':'Garchompite','lucario-mega':'Lucarionite',
+  'abomasnow-mega':'Abomasite','gallade-mega':'Galladite','audino-mega':'Audinite','diancie-mega':'Diancite',
+  'kyogre-primal':'Blue Orb','groudon-primal':'Red Orb'
+};
+function isMegaOrPrimal(slug){ return /-mega(-[xy])?$/.test(slug) || /-primal$/.test(slug); }
+
+const FORMAT_LIST = [
+  {id:'gen9ou', label:'OU (Standard)'},
+  {id:'gen9ubers', label:'Ubers'},
+  {id:'gen9uu', label:'UU'},
+  {id:'gen9ru', label:'RU'},
+  {id:'gen9nu', label:'NU'},
+  {id:'gen9anythinggoes', label:'Anything Goes'},
+  {id:'gen9nationaldex', label:'National Dex'},
+  {id:'gen9nationaldexubers', label:'National Dex Ubers'},
+  {id:'gen9monotype', label:'Monotype'},
+  {id:'gen9doublesou', label:'Doubles OU', doubles:true},
+  {id:'gen9vgc2025', label:'VGC 2025', doubles:true},
+  {id:'gen9nationaldexdoubles', label:'National Dex Doubles', doubles:true}
+];
+const FORMAT_LABELS = Object.fromEntries(FORMAT_LIST.map(f=>[f.id,f.label]));
+const FALLBACK_FORMAT_ORDER = ['gen9ou','gen9nationaldex','gen9ubers','gen9nationaldexubers','gen9uu','gen9ru','gen9nu','gen9anythinggoes','gen9monotype','gen9doublesou','gen9vgc2025','gen9nationaldexdoubles'];
+function isDoublesFormat(format){ const f = FORMAT_LIST.find(x=>x.id===format); return f ? !!f.doubles : /doubles|vgc/i.test(format); }
+function formatLabelFor(format){ return FORMAT_LABELS[format] || format; }
+
+const NATURE_GRID = [
+  ['Hardy','Lonely','Adamant','Naughty','Brave'],
+  ['Bold','Docile','Impish','Lax','Relaxed'],
+  ['Modest','Mild','Bashful','Rash','Quiet'],
+  ['Calm','Gentle','Careful','Quirky','Sassy'],
+  ['Timid','Hasty','Jolly','Naive','Serious']
+];
+const NATURE_STAT_ORDER = ['Attack','Defense','Sp. Atk','Sp. Def','Speed'];
+
+const pokeCache = {}; const lightCache = {}; const setsCache = {};
+let speciesNameList = null;
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function titleCase(s){ return String(s).replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+function displayName(s){ return titleCase(s); }
+function slugify(name){ return name.toLowerCase().replace(/[.']/g,'').replace(/[:]/g,'').replace(/\s+/g,'-').replace(/--+/g,'-'); }
+async function fetchJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error('not found'); return r.json(); }
+function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+async function resolveDefaultVariety(name){
+  try{
+    const sp = await fetchJSON(`https://pokeapi.co/api/v2/pokemon-species/${name}`);
+    const def = sp.varieties.find(v=>v.is_default) || sp.varieties[0];
+    return def ? def.pokemon.name : null;
+  }catch(e){ return null; }
+}
+function levenshtein(a,b){
+  const m=a.length, n=b.length;
+  const dp = Array.from({length:m+1}, (_,i)=>[i, ...Array(n).fill(0)]);
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+  return dp[m][n];
+}
+async function getSpeciesNameList(){
+  if(speciesNameList) return speciesNameList;
+  const data = await fetchJSON('https://pokeapi.co/api/v2/pokemon-species?limit=1300');
+  speciesNameList = data.results.map(r=>r.name);
+  return speciesNameList;
+}
+async function findClosestNames(query, max){
+  const list = await getSpeciesNameList();
+  const q = query.toLowerCase();
+  const scored = list.map(n=>{ let d = levenshtein(q, n); if(n.startsWith(q) || n.includes(q)) d -= 2; return {n, d}; });
+  scored.sort((a,b)=>a.d-b.d);
+  return scored.slice(0, max).map(s=>s.n);
+}
+
+/* ============================================================
+   TAB NAV
+   ============================================================ */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(btn.dataset.view).classList.add('active');
+    if(btn.dataset.view === 'tools-view') initToolsOnce();
+  });
+});
+
+/* ============================================================
+   QUICK PICKS
+   ============================================================ */
+const QUICK = ["pikachu","charizard","gengar","garchomp","sylveon","dragapult"];
+document.getElementById('quickPicks').innerHTML = QUICK.map(n=>`<span class="chip" data-n="${n}">${displayName(n)}</span>`).join('');
+document.querySelectorAll('.chip[data-n]').forEach(c=>c.addEventListener('click', ()=>{
+  document.getElementById('searchInput').value = c.dataset.n;
+  runSearch(c.dataset.n);
+}));
+
+/* ============================================================
+   SEARCH (with fuzzy "did you mean")
+   ============================================================ */
+document.getElementById('searchBtn').addEventListener('click', ()=>{ const v = document.getElementById('searchInput').value.trim().toLowerCase(); if(v) runSearch(v); });
+document.getElementById('searchInput').addEventListener('keydown', e=>{ if(e.key === 'Enter'){ const v = e.target.value.trim().toLowerCase(); if(v) runSearch(v); } });
+
+async function runSearch(name){
+  const results = document.getElementById('results');
+  const cleaned = name.replace(/\s+/g,'-').toLowerCase();
+  results.innerHTML = `<div class="status-msg"><div class="spinner"></div>Fetching data on ${escapeHtml(displayName(name))}…</div>`;
+  try{
+    const data = await loadFullPokemon(cleaned);
+    renderPokemon(data);
+  }catch(err){
+    results.innerHTML = `<div class="status-msg"><div class="spinner"></div>Checking for close matches…</div>`;
+    try{
+      const suggestions = await findClosestNames(cleaned, 5);
+      const close = suggestions.filter(s => levenshtein(cleaned, s) <= Math.max(3, Math.ceil(cleaned.length*0.4)));
+      if(close.length){
+        results.innerHTML = `<div class="status-msg">Could not find "${escapeHtml(name)}". Did you mean:
+            <div class="quick-picks" style="margin-top:14px;">${close.map(s=>`<span class="chip suggest" data-n="${s}">${displayName(s)}</span>`).join('')}</div></div>`;
+        results.querySelectorAll('.chip.suggest').forEach(c=>c.addEventListener('click', ()=>{ document.getElementById('searchInput').value = c.dataset.n; runSearch(c.dataset.n); }));
+      }else{
+        results.innerHTML = `<div class="status-msg error">Could not find "${escapeHtml(name)}", and no close matches turned up. Check the spelling or try a Dex number.</div>`;
+      }
+    }catch(e2){
+      results.innerHTML = `<div class="status-msg error">Could not find "${escapeHtml(name)}". Check the spelling — try a Dex number or the exact species name.</div>`;
+    }
+  }
+}
+
+async function loadFullPokemon(nameOrId){
+  const key = String(nameOrId).toLowerCase();
+  if(pokeCache[key]) return pokeCache[key];
+  let pokemon;
+  try{ pokemon = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${key}`); }
+  catch(e){ const resolved = await resolveDefaultVariety(key); if(!resolved) throw e; pokemon = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${resolved}`); }
+  const species = await fetchJSON(pokemon.species.url);
+  const evoChainData = await fetchJSON(species.evolution_chain.url);
+  const varieties = await Promise.all(species.varieties.map(v => fetchJSON(v.pokemon.url).catch(()=>null)));
+  const data = { pokemon, species, evoChainData, varieties: varieties.filter(Boolean) };
+  pokeCache[key] = data;
+  return data;
+}
+async function loadLightPokemon(name){
+  const key = 'light:'+name;
+  if(lightCache[key]) return lightCache[key];
+  let p;
+  try{ p = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${name}`); }
+  catch(e){ const resolved = await resolveDefaultVariety(name); if(!resolved) throw e; p = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${resolved}`); }
+  lightCache[key] = p;
+  return p;
+}
+
+/* ---------- Evolution description (wiki-detail) ---------- */
+function describeEvo(d){
+  const parts = [];
+  if(d.min_level) parts.push(`Level ${d.min_level}`);
+  if(d.item) parts.push(`use ${displayName(d.item.name)}`);
+  if(d.held_item) parts.push(`holding ${displayName(d.held_item.name)}`);
+  if(d.trigger && d.trigger.name === 'trade') parts.push('trade');
+  if(d.trade_species) parts.push(`for ${displayName(d.trade_species.name)}`);
+  if(d.min_happiness) parts.push(`Friendship ${d.min_happiness}+`);
+  if(d.min_affection) parts.push(`Affection ${d.min_affection}+`);
+  if(d.min_beauty) parts.push(`Beauty ${d.min_beauty}+`);
+  if(d.known_move) parts.push(`knowing ${displayName(d.known_move.name)}`);
+  if(d.known_move_type) parts.push(`knowing a ${displayName(d.known_move_type.name)}-type move`);
+  if(d.time_of_day) parts.push(`during the ${d.time_of_day}`);
+  if(d.location) parts.push(`near ${displayName(d.location.name)}`);
+  if(d.relative_physical_stats === 1) parts.push('Attack higher than Defense');
+  if(d.relative_physical_stats === -1) parts.push('Defense higher than Attack');
+  if(d.relative_physical_stats === 0) parts.push('Attack equal to Defense');
+  if(d.party_species) parts.push(`with ${displayName(d.party_species.name)} in party`);
+  if(d.party_type) parts.push(`with a ${displayName(d.party_type.name)}-type in party`);
+  if(d.needs_overworld_rain) parts.push('while raining');
+  if(d.turn_upside_down) parts.push('device turned upside down');
+  if(d.gender===1) parts.push('female only');
+  if(d.gender===2) parts.push('male only');
+  if(d.trigger){
+    const t = d.trigger.name;
+    if(t==='shed') parts.push('empty party slot + spare Poké Ball');
+    if(t==='spin') parts.push('spin the console/device');
+    if(t==='tower-of-darkness') parts.push('Tower of Darkness (Legends: Arceus)');
+    if(t==='tower-of-waters') parts.push('Tower of Waters (Legends: Arceus)');
+    if(t==='three-critical-hits') parts.push('land 3 critical hits in one battle');
+    if(t==='take-damage') parts.push('take damage at a specific location then level up');
+    if(t==='agile-style-move') parts.push('use an Agile Style move 20 times');
+    if(t==='strong-style-move') parts.push('use a Strong Style move 20 times');
+    if(t==='recoil-damage') parts.push('take recoil damage 4+ times in one battle');
+  }
+  if(!parts.length) parts.push('Level up');
+  return parts.join(' + ');
+}
+function capFirst(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function describeEvoLabel(d){ return capFirst(describeEvo(d)); }
+
+/* ---------- Evolution tree renderer (handles split evolutions) ---------- */
+function renderEvoNode(node){ const n = node.species.name; return `<div class="evo-node" data-evo-name="${n}"><img src="" data-evo-img="${n}" alt="${n}"><span>${displayName(n)}</span></div>`; }
+function renderEvoSubtree(node, trigger){
+  const arrowHTML = trigger!==undefined ? `<div class="evo-arrow"><span class="arr">→</span><span>${trigger}</span></div>` : '';
+  const nodeHTML = renderEvoNode(node);
+  if(!node.evolves_to || node.evolves_to.length===0) return `<div class="evo-branch-item">${arrowHTML}${nodeHTML}</div>`;
+  const childrenHTML = node.evolves_to.map(child=>{
+    const trig = child.evolution_details && child.evolution_details.length ? describeEvoLabel(child.evolution_details[0]) : 'Level up';
+    return renderEvoSubtree(child, trig);
+  }).join('');
+  const wrapClass = node.evolves_to.length>1 ? 'evo-branch-group' : 'evo-chain-inline';
+  return `<div class="evo-branch-item">${arrowHTML}${nodeHTML}<div class="${wrapClass}">${childrenHTML}</div></div>`;
+}
+function buildEvoHTML(evoChainData){
+  const root = evoChainData.chain;
+  if(!root.evolves_to || !root.evolves_to.length) return `<div style="color:var(--text-dim); font-size:13px;">This Pokémon does not evolve.</div>`;
+  return `<div class="evo-tree">${renderEvoSubtree(root)}</div>`;
+}
+
+function renderPokemon(data){
+  const results = document.getElementById('results');
+  const { pokemon, species } = data;
+  results.innerHTML = buildPokeCardHTML(pokemon, species, data);
+  wireCardInteractions(data);
+}
+function statLabel(n){ return ({'hp':'HP','attack':'ATK','defense':'DEF','special-attack':'SPA','special-defense':'SPD','speed':'SPE'})[n]||n; }
+
+function buildPokeCardHTML(pokemon, species, data){
+  const types = pokemon.types.map(t=>t.type.name);
+  const region = REGION_BY_GEN[species.generation.name] || titleCase(species.generation.name);
+  const artUrl = pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default;
+  const maxStat = 180;
+  const statsHTML = pokemon.stats.map(s=>`
+    <div class="stat-row">
+      <div class="stat-label">${statLabel(s.stat.name)}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.min(100, s.base_stat/maxStat*100)}%"></div></div>
+      <div class="stat-val">${s.base_stat}</div>
+    </div>`).join('');
+  const formButtons = data.varieties.length > 1 ? `<div class="form-select">
+    ${data.varieties.map(v=>`<button class="form-btn ${v.name===pokemon.name?'active':''}" data-form="${v.name}">${formLabel(v.name, species.name)}</button>`).join('')}
+  </div>` : '';
+  const allVarietySlugs = data.varieties.map(v=>v.name).join(',');
+
+  return `
+  <div class="poke-card">
+    <div class="poke-head">
+      <div class="poke-art"><img src="${artUrl}" alt="${pokemon.name}"></div>
+      <div class="poke-meta">
+        <div class="dex-num">#${String(species.id).padStart(4,'0')}</div>
+        <div class="poke-name">${displayName(pokemon.name)}</div>
+        <div class="type-row">${types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t]}">${displayName(t)}</span>`).join('')}</div>
+        <div class="region-tag">Native region: <b>${region}</b></div>
+        ${formButtons}
+      </div>
+      <div class="stat-block">${statsHTML}</div>
+    </div>
+    <div class="section-tabs">
+      <button class="active" data-pane="pane-weak">Weaknesses</button>
+      <button data-pane="pane-moves">Moves</button>
+      <button data-pane="pane-evo">Evolution</button>
+      <button data-pane="pane-forms">Forms</button>
+      <button data-pane="pane-sets">Sets</button>
+    </div>
+    <div class="section-body">
+      <div class="section-pane active" id="pane-weak">${buildWeaknessHTML(types)}</div>
+      <div class="section-pane" id="pane-moves">${buildMovesHTML(pokemon)}</div>
+      <div class="section-pane" id="pane-evo">${buildEvoHTML(data.evoChainData)}</div>
+      <div class="section-pane" id="pane-forms">${buildFormsHTML(data.varieties)}</div>
+      <div class="section-pane" id="pane-sets" data-slug="${pokemon.name}" data-all-slugs="${allVarietySlugs}">
+        <div class="sets-toolbar">
+          <select class="format-select" id="setsFormatSelect"></select>
+          <button class="regen-btn" id="regenSetsBtn">Generate 3 more</button>
+        </div>
+        <div id="setsContainer"><div class="status-msg"><div class="spinner"></div>Loading competitive sets…</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+function formLabel(varietyName, baseName){
+  if(varietyName === baseName) return 'Base';
+  const suffix = varietyName.replace(baseName+'-','');
+  return titleCase(suffix);
+}
+function buildWeaknessHTML(types){
+  const groups = {};
+  ALL_TYPES.forEach(t=>{ const m = defenseMultiplier(types, t); if(m===1) return; groups[m] = groups[m]||[]; groups[m].push(t); });
+  const labels = {4:'4× Weak', 2:'2× Weak', 0.5:'Resists (½×)', 0.25:'Resists (¼×)', 0:'Immune'};
+  let html = `<div class="weak-grid-title">Defensive matchups for this typing, against all 18 attacking types.</div><div class="eff-groups">`;
+  [4,2,0.5,0.25,0].forEach(m=>{
+    if(!groups[m] || !groups[m].length) return;
+    html += `<div class="eff-group"><h4>${labels[m]}</h4><div class="eff-chips">
+      ${groups[m].map(t=>`<span class="eff-chip" style="border-color:${TYPE_COLORS[t]}66"><span style="width:8px;height:8px;border-radius:2px;background:${TYPE_COLORS[t]};display:inline-block;"></span>${displayName(t)} <small>${m}×</small></span>`).join('')}
+    </div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+function buildMovesHTML(pokemon){
+  const groups = { 'level-up': [], 'egg': [], 'machine': [] };
+  pokemon.moves.forEach(m=>{
+    m.version_group_details.forEach(vgd=>{
+      const method = vgd.move_learn_method.name;
+      const key = method === 'level-up' ? 'level-up' : method === 'egg' ? 'egg' : (method==='machine' ? 'machine' : null);
+      if(!key) return;
+      if(!groups[key].some(x=>x.name===m.move.name)) groups[key].push({ name: m.move.name, level: vgd.level_learned_at });
+    });
+  });
+  groups['level-up'].sort((a,b)=>a.level-b.level);
+  const tabIds = [['level-up','Level Up'],['egg','Egg Moves'],['machine','TM / TR']];
+  const tabsHTML = tabIds.map((t,i)=>`<button class="move-tab-btn ${i===0?'active':''}" data-move-group="${t[0]}">${t[1]} (${groups[t[0]].length})</button>`).join('');
+  const paneHTML = tabIds.map((t,i)=>`
+    <div class="move-scroll move-pane" data-move-pane="${t[0]}" style="${i===0?'':'display:none'}">
+      <table class="move-table">
+        <thead><tr>${t[0]==='level-up'?'<th>Lv.</th>':''}<th>Move</th><th>Type</th><th>Cat</th><th>Pow</th><th>Acc</th><th>Effect</th></tr></thead>
+        <tbody>
+          ${groups[t[0]].length ? groups[t[0]].map(m=>`<tr data-move="${m.name}">${t[0]==='level-up'?`<td>${m.level||'—'}</td>`:''}<td class="move-name">${displayName(m.name)}</td><td class="col-type">…</td><td class="col-cat">…</td><td class="col-pow">…</td><td class="col-acc">…</td><td class="col-effect">…</td></tr>`).join('') : `<tr><td colspan="6" style="color:var(--text-dim)">None available</td></tr>`}
+        </tbody>
+      </table>
+    </div>`).join('');
+  return `<div class="move-tabs">${tabsHTML}</div>${paneHTML}`;
+}
+const moveDetailCache = {};
+async function fetchMoveDetail(name){
+  if(moveDetailCache[name]) return moveDetailCache[name];
+  const d = await fetchJSON(`https://pokeapi.co/api/v2/move/${name}`);
+  const eng = d.effect_entries.find(e=>e.language.name==='en');
+  let effect = eng ? eng.short_effect : 'No effect text available.';
+  if(d.effect_chance!=null) effect = effect.replace('$effect_chance', d.effect_chance);
+  const detail = { type: d.type.name, cat: d.damage_class ? d.damage_class.name : 'status', power: d.power, accuracy: d.accuracy, effect };
+  moveDetailCache[name] = detail;
+  return detail;
+}
+async function loadMoveDetailsForPane(paneRoot){
+  if(paneRoot.dataset.movesLoaded) return;
+  paneRoot.dataset.movesLoaded = '1';
+  const rows = Array.from(paneRoot.querySelectorAll('tr[data-move]'));
+  await Promise.all(rows.map(async row=>{
+    try{
+      const d = await fetchMoveDetail(row.dataset.move);
+      row.querySelector('.col-type').innerHTML = `<span class="type-badge" style="background:${TYPE_COLORS[d.type]}; font-size:9px; padding:3px 7px;">${displayName(d.type)}</span>`;
+      row.querySelector('.col-cat').textContent = displayName(d.cat);
+      row.querySelector('.col-pow').textContent = (d.power===null||d.power===undefined) ? '—' : d.power;
+      row.querySelector('.col-acc').textContent = (d.accuracy===null||d.accuracy===undefined) ? '—' : d.accuracy+'%';
+      row.querySelector('.col-effect').textContent = d.effect;
+    }catch(e){
+      const eff = row.querySelector('.col-effect'); if(eff) eff.textContent = '—';
+    }
+  }));
+}
+function buildFormsHTML(varieties){
+  if(varieties.length <= 1) return `<div style="color:var(--text-dim); font-size:13px;">No alternate forms, Mega Evolutions, or Gigantamax variants recorded for this species.</div>`;
+  return `<div class="forms-grid">
+    ${varieties.map(v=>`<div class="form-card"><img src="${v.sprites.other?.['official-artwork']?.front_default || v.sprites.front_default || ''}" alt="${v.name}"><span>${formLabel(v.name, v.species.name)}</span></div>`).join('')}
+  </div>`;
+}
+
+function wireCardInteractions(data){
+  document.querySelectorAll('.section-tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.section-tabs button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.section-pane').forEach(p=>p.classList.remove('active'));
+      const pane = document.getElementById(btn.dataset.pane);
+      pane.classList.add('active');
+      if(btn.dataset.pane === 'pane-moves' && !pane.dataset.movesInit){
+        pane.dataset.movesInit = '1';
+        pane.querySelectorAll('.move-pane').forEach(mp => loadMoveDetailsForPane(mp));
+      }
+      if(btn.dataset.pane === 'pane-sets' && !pane.dataset.loaded){
+        pane.dataset.loaded = '1';
+        populateFormatSelect(document.getElementById('setsFormatSelect'));
+        loadAndRenderSets(pane.dataset.slug, pane.dataset.allSlugs, document.getElementById('setsFormatSelect').value);
+      }
+    });
+  });
+  document.querySelectorAll('.move-tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.move-tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.move-pane').forEach(p=> p.style.display = (p.dataset.movePane===btn.dataset.moveGroup ? '' : 'none'));
+    });
+  });
+  document.querySelectorAll('[data-evo-img]').forEach(async img=>{
+    const n = img.dataset.evoImg;
+    try{ const p = await fetchJSON(`https://pokeapi.co/api/v2/pokemon/${n}`); img.src = p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default || ''; }catch(e){}
+  });
+  document.querySelectorAll('.evo-node').forEach(el=>{
+    el.addEventListener('click', ()=>{ const n = el.dataset.evoName; document.getElementById('searchInput').value = n; runSearch(n); window.scrollTo({top:0, behavior:'smooth'}); });
+  });
+  document.querySelectorAll('.form-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const formName = btn.dataset.form;
+      const variety = data.varieties.find(v=>v.name===formName);
+      if(!variety) return;
+      renderPokemon({ pokemon: variety, species: data.species, evoChainData: data.evoChainData, varieties: data.varieties });
+    });
+  });
+  const fmtSel = document.getElementById('setsFormatSelect');
+  if(fmtSel){
+    fmtSel.addEventListener('change', ()=>{
+      const pane = document.getElementById('pane-sets');
+      pane.dataset.loaded = '1';
+      loadAndRenderSets(pane.dataset.slug, pane.dataset.allSlugs, fmtSel.value);
+    });
+  }
+  const regenBtn = document.getElementById('regenSetsBtn');
+  if(regenBtn){
+    regenBtn.addEventListener('click', ()=>{ regenerateGeneratedSets(); });
+  }
+}
+
+/* ============================================================
+   FORMAT SELECT HELPERS
+   ============================================================ */
+function populateFormatSelect(selectEl){
+  if(!selectEl || selectEl.dataset.populated) return;
+  selectEl.innerHTML = FORMAT_LIST.map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
+  selectEl.dataset.populated = '1';
+}
+
+/* ============================================================
+   SMOGON SETS
+   ============================================================ */
+async function loadSmogonSets(format){
+  if(setsCache[format]) return setsCache[format];
+  const raw = await fetchJSON(`https://data.pkmn.cc/sets/${format}.json`);
+  const slugIndex = {};
+  Object.keys(raw).forEach(display => { slugIndex[slugify(display)] = display; });
+  const entry = { data: raw, slugIndex };
+  setsCache[format] = entry;
+  return entry;
+}
+function collectSmogonMatches(sets, allSlugs){
+  const out = [];
+  allSlugs.forEach(slug=>{
+    const display = sets.slugIndex[slug];
+    if(display && sets.data[display]) out.push({ slug, display, sets: sets.data[display] });
+  });
+  return out;
+}
+
+function renderSmogonSetCard(setName, set, formTag){
+  const evsSource = Array.isArray(set.evs) ? set.evs[0] : set.evs;
+  const evsHTML = evsSource ? Object.entries(evsSource).map(([k,v])=>`<span class="ev-pill">${v} ${k.toUpperCase()}</span>`).join('') : '';
+  const altEvsNote = Array.isArray(set.evs) && set.evs.length>1 ? `<div class="set-line" style="font-size:11px; color:var(--text-dim);">+${set.evs.length-1} alternate spread${set.evs.length>2?'s':''} exist for this set</div>` : '';
+  const ivsSource = Array.isArray(set.ivs) ? set.ivs[0] : set.ivs;
+  const ivsHTML = ivsSource ? Object.entries(ivsSource).map(([k,v])=>`<span class="ev-pill">${v} IV ${k.toUpperCase()}</span>`).join('') : '';
+  const natureVal = Array.isArray(set.nature) ? set.nature.join(' / ') : (set.nature || '—');
+  const itemVal = Array.isArray(set.item) ? set.item.join(' / ') : (set.item || '—');
+  const abilityVal = Array.isArray(set.ability) ? set.ability.join(' / ') : (set.ability || '—');
+  const movesHTML = (set.moves||[]).map(m => `<div class="set-move">${Array.isArray(m) ? m.map(displayName).join(' / ') : displayName(m)}</div>`).join('');
+  const isMega = formTag && /mega|primal/i.test(formTag);
+  return `
+    <div class="set-card ${isMega?'mega':''}">
+      <div class="set-card-head">
+        <div><div class="set-name">${setName}</div>${formTag?`<span class="set-form-tag">${formTag}</span>`:''}</div>
+        <div class="set-tags"><span class="set-tag smogon">Smogon</span>${isMega?'<span class="set-tag mega">Mega</span>':''}</div>
+      </div>
+      <div class="set-line"><b>Ability:</b> ${abilityVal}</div>
+      <div class="set-line"><b>Item:</b> ${itemVal}</div>
+      <div class="set-line"><b>Nature:</b> ${natureVal}</div>
+      <div class="set-moves">${movesHTML}</div>
+      <div class="set-evs">${evsHTML}${ivsHTML}</div>
+      ${altEvsNote}
+    </div>`;
+}
+function renderGeneratedSetCard(gset){
+  const evsHTML = Object.entries(gset.evs).map(([k,v])=>`<span class="ev-pill">${v} ${k.toUpperCase()}</span>`).join('');
+  const movesHTML = gset.moves.map(m => `<div class="set-move">${displayName(m)}</div>`).join('');
+  const isMega = gset.mega;
+  return `
+    <div class="set-card ${isMega?'mega':''}">
+      <div class="set-card-head"><div class="set-name">${gset.label}</div><div class="set-tags"><span class="set-tag generated">Generated</span>${isMega?'<span class="set-tag mega">Mega</span>':''}</div></div>
+      <div class="set-line"><b>Ability:</b> ${gset.ability}</div>
+      <div class="set-line"><b>Item:</b> ${gset.item}</div>
+      <div class="set-line"><b>Nature:</b> ${gset.nature}</div>
+      <div class="set-moves">${movesHTML}</div>
+      <div class="set-evs">${evsHTML}</div>
+    </div>`;
+}
+
+function roleProfile(pokemon){
+  const st = {}; pokemon.stats.forEach(s=> st[s.stat.name]=s.base_stat);
+  const physical = st.attack >= st['special-attack'];
+  const bulk = st.hp + st.defense + st['special-defense'];
+  const mega = isMegaOrPrimal(pokemon.name);
+  let role, item, nature;
+  if(mega){
+    item = MEGA_STONE_MAP[pokemon.name] || `${displayName(pokemon.name.split('-')[0])}ite (mega stone)`;
+    if(bulk >= 320){ role='Bulky Mega'; nature = physical ? 'Impish' : 'Calm'; }
+    else if(st.speed >= 100){ role='Fast Mega Sweeper'; nature = physical ? 'Jolly' : 'Timid'; }
+    else { role='Mega Wallbreaker'; nature = physical ? 'Adamant' : 'Modest'; }
+  }else if(bulk >= 320){ role='Bulky Wall'; item='Leftovers'; nature = physical ? 'Impish' : 'Calm'; }
+  else if(st.speed >= 100 && Math.max(st.attack,st['special-attack']) >= 100){ role='Sweeper'; item='Life Orb'; nature = physical ? 'Jolly' : 'Timid'; }
+  else if(st.speed >= 95){ role='Fast Attacker'; item='Choice Scarf'; nature = physical ? 'Jolly' : 'Timid'; }
+  else if(Math.max(st.attack,st['special-attack']) >= 100){ role='Wallbreaker'; item = physical ? 'Choice Band' : 'Choice Specs'; nature = physical ? 'Adamant' : 'Modest'; }
+  else { role='Support'; item='Rocky Helmet'; nature = physical ? 'Careful' : 'Sassy'; }
+  return { st, physical, role, item, nature, bulk, mega };
+}
+function buildGeneratedSet(pokemon){
+  const { physical, role, item, nature, mega } = roleProfile(pokemon);
+  const levelMoves = [...new Set(pokemon.moves
+    .filter(m => m.version_group_details.some(v=>v.move_learn_method.name==='level-up'))
+    .map(m => ({ name:m.move.name, lvl: Math.max(...m.version_group_details.filter(v=>v.move_learn_method.name==='level-up').map(v=>v.level_learned_at)) })))]
+    .sort((a,b)=>b.lvl-a.lvl);
+  let pool = levelMoves.map(m=>m.name);
+  if(pool.length < 4){
+    const tmMoves = pokemon.moves.filter(m => m.version_group_details.some(v=>v.move_learn_method.name==='machine')).map(m=>m.move.name);
+    pool = [...new Set([...pool, ...tmMoves])];
+  }
+  pool = shuffle(pool.slice(0, Math.min(pool.length, 14)));
+  const moves = pool.slice(0,4);
+  while(moves.length < 4) moves.push('struggle');
+  let evs;
+  if(role==='Bulky Wall' || role==='Bulky Mega') evs = physical ? {hp:252, def:252, spd:4} : {hp:252, spd:252, def:4};
+  else if(role==='Sweeper' || role==='Fast Attacker' || role==='Fast Mega Sweeper') evs = physical ? {atk:252, spe:252, hp:4} : {spa:252, spe:252, hp:4};
+  else if(role==='Wallbreaker' || role==='Mega Wallbreaker') evs = physical ? {atk:252, spe:252, hp:4} : {spa:252, spe:252, hp:4};
+  else evs = {hp:252, spd:physical?4:252, def:physical?252:4};
+  return { label: role, item, nature, evs, moves, mega, ability: pokemon.abilities?.[0]?.ability?.name ? displayName(pokemon.abilities[0].ability.name) : '—' };
+}
+
+async function loadAndRenderSets(currentSlug, allSlugsCsv, format){
+  const container = document.getElementById('setsContainer');
+  if(!container) return;
+  container.innerHTML = `<div class="status-msg"><div class="spinner"></div>Loading competitive sets…</div>`;
+  const allSlugs = allSlugsCsv.split(',').filter(Boolean);
+  try{
+    const pokemon = await loadLightPokemon(currentSlug);
+    let sets = await loadSmogonSets(format).catch(()=>null);
+    let foundFormat = format;
+    let matches = sets ? collectSmogonMatches(sets, allSlugs) : [];
+    if(!matches.length){
+      for(const fmt of FALLBACK_FORMAT_ORDER){
+        if(fmt===format) continue;
+        try{
+          const s2 = await loadSmogonSets(fmt);
+          const m2 = collectSmogonMatches(s2, allSlugs);
+          if(m2.length){ matches = m2; foundFormat = fmt; break; }
+        }catch(e){ /* format file unavailable, skip */ }
+      }
+    }
+    renderSetsContainer(pokemon, matches, foundFormat, format);
+  }catch(e){
+    container.innerHTML = `<div class="status-msg error">Could not load competitive set data right now. Check your connection and try again.</div>`;
+  }
+}
+function renderSetsContainer(pokemon, matches, foundFormat, selectedFormat){
+  const container = document.getElementById('setsContainer');
+  const smogonHTML = matches.map(m => {
+    const formTag = m.slug !== m.display.toLowerCase().replace(/\s+/g,'-') ? displayName(m.slug) : null;
+    return Object.entries(m.sets).map(([name,set]) => renderSmogonSetCard(name, set, matches.length>1 ? displayName(m.slug) : null)).join('');
+  }).join('');
+  const smogonCount = matches.reduce((n,m)=>n+Object.keys(m.sets).length, 0);
+  const generated = Array.from({length:3}, ()=> buildGeneratedSet(pokemon));
+  const fallbackNote = (foundFormat !== selectedFormat)
+    ? `<div class="fallback-note">No Smogon sets found for this Pokémon in ${formatLabelFor(selectedFormat)} — showing sets from ${formatLabelFor(foundFormat)} instead.</div>`
+    : '';
+  const smogonSection = smogonCount ? `<div class="sets-section-title">Smogon Sets (${smogonCount})</div><div class="sets-grid">${smogonHTML}</div>` : `<div class="weak-grid-title">No official Smogon sets found for this Pokémon in any tracked format — showing sets generated from its real movepool and stats instead.</div>`;
+  const generatedSection = `<div class="sets-section-title">Generated Sets (3)</div><div class="sets-grid" id="generatedGrid">${generated.map(renderGeneratedSetCard).join('')}</div>`;
+  container.innerHTML = `${fallbackNote}${smogonSection}${generatedSection}`;
+  window.__lastSetsPokemon = pokemon;
+}
+function regenerateGeneratedSets(){
+  if(!window.__lastSetsPokemon) return;
+  const grid = document.getElementById('generatedGrid');
+  if(!grid) return;
+  const generated = Array.from({length:3}, ()=> buildGeneratedSet(window.__lastSetsPokemon));
+  grid.innerHTML = generated.map(renderGeneratedSetCard).join('');
+}
+
+/* ============================================================
+   TEAM BUILDER
+   ============================================================ */
+populateFormatSelect(document.getElementById('formatSelect'));
+document.querySelectorAll('input[name=ruleset]').forEach(r=>{
+  r.addEventListener('change', ()=>{ document.getElementById('customRulesBlock').style.display = (r.value==='custom' && r.checked) ? 'block' : 'none'; });
+});
+document.getElementById('requiredTypes').innerHTML = ALL_TYPES.map(t=>`<span class="type-pill" data-type="${t}" style="background:${TYPE_COLORS[t]}">${displayName(t)}</span>`).join('');
+document.getElementById('targetTypes').innerHTML = ALL_TYPES.map(t=>`<span class="type-pill" data-type="${t}" style="background:${TYPE_COLORS[t]}">${displayName(t)}</span>`).join('');
+document.querySelectorAll('.type-pill').forEach(p=> p.addEventListener('click', ()=> p.classList.toggle('on')));
+document.getElementById('buildBtn').addEventListener('click', draftTeams);
+
+let extraSeedCount = 0;
+document.getElementById('addSeedBtn').addEventListener('click', ()=>{
+  if(extraSeedCount >= 3) return;
+  extraSeedCount++;
+  const id = 'extraSeed'+extraSeedCount;
+  const row = document.createElement('div');
+  row.className = 'extra-seed-row';
+  row.innerHTML = `<input type="text" id="${id}" placeholder="Another seed, e.g. Rotom-Wash"><button type="button" class="remove-seed">✕</button>`;
+  document.getElementById('extraSeedsRow').appendChild(row);
+  row.querySelector('.remove-seed').addEventListener('click', ()=> row.remove());
+  if(extraSeedCount >= 3) document.getElementById('addSeedBtn').style.display = 'none';
+});
+
+/* seed form picker (so "rotom" surfaces Wash/Heat/Fan/etc as tabs instead of typing rotom-wash) */
+let selectedSeedSlug = null;
+document.getElementById('seedInput').addEventListener('blur', checkSeedForms);
+document.getElementById('seedInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkSeedForms(); });
+async function checkSeedForms(){
+  const raw = document.getElementById('seedInput').value.trim().toLowerCase().replace(/\s+/g,'-');
+  const row = document.getElementById('seedFormsRow');
+  selectedSeedSlug = null;
+  if(!raw){ row.innerHTML=''; return; }
+  try{
+    const sp = await fetchJSON(`https://pokeapi.co/api/v2/pokemon-species/${raw}`);
+    if(sp.varieties.length > 1){
+      row.innerHTML = sp.varieties.map(v=>`<span class="chip form-pick ${v.is_default?'suggest':''}" data-slug="${v.pokemon.name}">${formLabel(v.pokemon.name, sp.name)}</span>`).join('');
+      row.querySelectorAll('.form-pick').forEach(c=>{
+        c.addEventListener('click', ()=>{
+          row.querySelectorAll('.form-pick').forEach(x=>x.classList.remove('suggest'));
+          c.classList.add('suggest');
+          selectedSeedSlug = c.dataset.slug;
+        });
+      });
+    }else{
+      row.innerHTML = '';
+    }
+  }catch(e){ row.innerHTML=''; }
+}
+
+async function draftTeams(){
+  const tbResults = document.getElementById('tbResults');
+  const typedSeed = document.getElementById('seedInput').value.trim().toLowerCase().replace(/\s+/g,'-');
+  const mainSeedName = selectedSeedSlug || typedSeed;
+  const extraSeedNames = Array.from(document.querySelectorAll('.extra-seed-row input'))
+    .map(inp => inp.value.trim().toLowerCase().replace(/\s+/g,'-'))
+    .filter(Boolean);
+  const seedNames = [mainSeedName, ...extraSeedNames].filter(Boolean);
+  const targetTypes = Array.from(document.querySelectorAll('#targetTypes .type-pill.on')).map(p=>p.dataset.type);
+  const format = document.getElementById('formatSelect').value;
+
+  if(!seedNames.length && !targetTypes.length){
+    tbResults.innerHTML = `<div class="tb-status">Enter at least one seed Pokémon, or pick a type combo to counter.</div>`;
+    return;
+  }
+  tbResults.innerHTML = `<div class="tb-status"><div class="spinner"></div>Pulling ${formatLabelFor(format)} data and scouting teammates…</div>`;
+
+  let seeds = [], sets;
+  try{
+    seeds = (await Promise.all(seedNames.map(n => loadLightPokemon(n).catch(()=>null)))).filter(Boolean);
+    if(seedNames.length && !seeds.length) throw new Error('none resolved');
+    try{ sets = await loadSmogonSets(format); }
+    catch(e){ sets = await loadSmogonSets(isDoublesFormat(format) ? 'gen9doublesou' : 'gen9ou'); }
+  }catch(e){
+    tbResults.innerHTML = `<div class="tb-status" style="color:var(--red)">Could not find one of those Pokémon, or load set data for this format. Check the spelling and try again.</div>`;
+    return;
+  }
+
+  const ruleset = document.querySelector('input[name=ruleset]:checked').value;
+  let noLegendary = false, monoType = false, requiredTypes = [];
+  if(ruleset === 'standard') noLegendary = true;
+  if(ruleset === 'custom'){
+    noLegendary = document.getElementById('ruleNoLegendary').checked;
+    monoType = document.getElementById('ruleMonoType').checked;
+    requiredTypes = Array.from(document.querySelectorAll('#requiredTypes .type-pill.on')).map(p=>p.dataset.type);
+  }
+
+  const seedNameSet = new Set(seeds.map(s=>s.name));
+  const allSlugs = Object.keys(sets.slugIndex).filter(s => !seedNameSet.has(s));
+  let poolSlugs = noLegendary ? allSlugs.filter(s=>!LEGENDARY_SET.has(s)) : allSlugs;
+  if(!poolSlugs.length){ tbResults.innerHTML = `<div class="tb-status" style="color:var(--red)">No candidate Pokémon available for this format/ruleset combination.</div>`; return; }
+
+  const sampleSlugs = shuffle(poolSlugs).slice(0, Math.min(poolSlugs.length, 110));
+  let candidatePool;
+  try{ candidatePool = (await Promise.all(sampleSlugs.map(s => loadLightPokemon(s).catch(()=>null)))).filter(Boolean); }
+  catch(e){ candidatePool = []; }
+  if(monoType && seeds.length){
+    const primaryType = seeds[0].types[0].type.name;
+    candidatePool = candidatePool.filter(c => c.types.some(t=>t.type.name===primaryType));
+  }
+  if(candidatePool.length < 5){ tbResults.innerHTML = `<div class="tb-status" style="color:var(--red)">Not enough valid candidates for these constraints — try loosening the rules.</div>`; return; }
+
+  const teams = [];
+  const usedCounts = {};
+  for(let t=0; t<3; t++){
+    const team = draftOneTeam(seeds, candidatePool, { requiredTypes, targetTypes, format, variantIndex:t }, usedCounts);
+    team.slice(seeds.length).forEach(m => { usedCounts[m.name] = (usedCounts[m.name]||0) + 1; });
+    teams.push(team);
+  }
+  renderTeamAccordions(teams, format, ruleset, {noLegendary, monoType, requiredTypes, targetTypes}, sets, seeds.length);
+}
+
+function weightedPick(scoredList){
+  const minScore = Math.min(...scoredList.map(x=>x.score));
+  const weights = scoredList.map(x => (x.score - minScore) + 1);
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<scoredList.length;i++){ r -= weights[i]; if(r<=0) return scoredList[i]; }
+  return scoredList[scoredList.length-1];
+}
+
+function draftOneTeam(seeds, candidatePool, opts, usedCounts){
+  const seedWeakSet = new Set();
+  seeds.forEach(seed=>{
+    const seedTypes = seed.types.map(t=>t.type.name);
+    ALL_TYPES.forEach(t=>{ if(defenseMultiplier(seedTypes,t) > 1) seedWeakSet.add(t); });
+  });
+  const seedWeak = [...seedWeakSet];
+  const targetTypes = opts.targetTypes || [];
+  const isDoubles = isDoublesFormat(opts.format);
+  let pool = shuffle(candidatePool.slice());
+  const team = seeds.slice();
+  let usedTypes = new Set();
+  seeds.forEach(seed => seed.types.forEach(t=>usedTypes.add(t.type.name)));
+
+  const slotsNeeded = Math.max(1, 6 - team.length);
+  for(let i=0;i<slotsNeeded && pool.length;i++){
+    const scored = [];
+    pool.forEach((c, idx)=>{
+      if(team.some(m=>m.name===c.name)) return;
+      const cTypes = c.types.map(t=>t.type.name);
+      let score = 0;
+      seedWeak.forEach(w=>{ const m = defenseMultiplier(cTypes, w); if(m<1) score += 3; if(m===0) score += 2; });
+      cTypes.forEach(t=> ALL_TYPES.forEach(def=>{ if(multiplier(t,def)>=2) score += 0.15; }));
+      cTypes.forEach(t=>{ if(!usedTypes.has(t)) score += 2; });
+      if(opts.requiredTypes.length && cTypes.some(t=>opts.requiredTypes.includes(t))) score += 6;
+      if(targetTypes.length){
+        targetTypes.forEach(tt=>{
+          const dm = defenseMultiplier(cTypes, tt);
+          if(dm < 1) score += 3.5;
+          if(dm === 0) score += 2.5;
+          cTypes.forEach(t=>{ if(multiplier(t, tt) >= 2) score += 3; });
+        });
+      }
+      const bst = c.stats.reduce((s,x)=>s+x.base_stat,0);
+      score += bst/400;
+      if(isDoubles){
+        const moveNames = c.moves.map(m=>m.move.name);
+        if(moveNames.some(m=>DOUBLES_SUPPORT_MOVES.has(m))) score += 2.5;
+      }
+      score -= (usedCounts[c.name]||0) * 3.2;
+      score += Math.random()*1.6;
+      scored.push({ c, idx, score });
+    });
+    if(!scored.length) break;
+    scored.sort((a,b)=>b.score-a.score);
+    const topK = scored.slice(0, Math.min(8, scored.length));
+    const chosen = weightedPick(topK);
+    team.push(chosen.c);
+    chosen.c.types.forEach(t=>usedTypes.add(t.type.name));
+    pool.splice(chosen.idx,1);
+  }
+  return team.slice(0,6);
+}
+
+function roleForMon(p){
+  const st = {}; p.stats.forEach(s=> st[s.stat.name]=s.base_stat);
+  const bulk = st.hp + st.defense + st['special-defense'];
+  const atk = Math.max(st.attack, st['special-attack']);
+  if(st.speed >= 100 && atk >= 95) return 'Sweeper';
+  if(bulk >= 300) return 'Wall / Tank';
+  if(st.speed >= 95) return 'Fast Attacker';
+  if(atk >= 100) return 'Attacker';
+  return 'Support';
+}
+function rationaleForPick(seeds, mon){
+  const seedWeakSet = new Set();
+  seeds.forEach(seed=>{
+    const seedTypes = seed.types.map(t=>t.type.name);
+    ALL_TYPES.forEach(t=>{ if(defenseMultiplier(seedTypes,t) > 1) seedWeakSet.add(t); });
+  });
+  const monTypes = mon.types.map(t=>t.type.name);
+  const covered = [...seedWeakSet].filter(w => defenseMultiplier(monTypes, w) < 1);
+  const bits = [];
+  if(covered.length) bits.push(`covers the team's ${covered.slice(0,2).map(displayName).join('/')} weakness`);
+  bits.push(`brings ${roleForMon(mon).toLowerCase()} pressure`);
+  return bits.join('; ') + '.';
+}
+
+function deriveStrategy(team, isDoubles, numSeeds, targetTypes){
+  numSeeds = numSeeds || 1;
+  targetTypes = targetTypes || [];
+  const allMoves = new Set();
+  team.forEach(p => p.moves.forEach(m => allMoves.add(m.move.name)));
+  const hazard = [...allMoves].filter(m=>HAZARD_MOVES.has(m)).length;
+  const sweepBoost = [...allMoves].filter(m=>SWEEP_MOVES.has(m)).length;
+  const recovery = [...allMoves].filter(m=>RECOVERY_MOVES.has(m)).length;
+  const weatherMovesFound = [...allMoves].filter(m=>WEATHER_MOVE_TITLES[m]);
+  const support = [...allMoves].filter(m=>DOUBLES_SUPPORT_MOVES.has(m)).length;
+  const screens = [...allMoves].filter(m=>SCREENS_MOVES.has(m)).length;
+  const trickRoom = [...allMoves].filter(m=>TRICKROOM_MOVES.has(m)).length;
+  const pivot = [...allMoves].filter(m=>PIVOT_MOVES.has(m)).length;
+  const trap = [...allMoves].filter(m=>TRAP_MOVES.has(m)).length;
+  const avgSpeed = team.reduce((s,p)=> s + p.stats.find(x=>x.stat.name==='speed').base_stat, 0) / team.length;
+  const weatherTitle = weatherMovesFound.length ? WEATHER_MOVE_TITLES[weatherMovesFound[0]] : null;
+
+  const scoredBase = [
+    { title:'Hazard Stack', score: hazard*2, desc:'Layer entry hazards early, then chip the opposing team down with repeated switches while your hazard-setters hold their ground.' },
+    { title: weatherTitle || 'Weather Balance', score: weatherMovesFound.length*2, desc:'Set the weather and lean on the members that benefit from it, using the rest of the roster to control the tempo.' },
+    { title:'Full Sweep', score: sweepBoost*1.8 + (avgSpeed>95?2:0), desc:'Get a stat-boosting sweeper set up mid-game and let it run through the opposing team once support has cleared the way.' },
+    { title:'Bulky Balance', score: recovery*1.6, desc:'Out-heal and out-last the opponent — recover off chip damage, wear down threats, and win the attrition war.' },
+    { title:'Trick Room', score: trickRoom*5, desc:'Flip the speed order with Trick Room, then let your slow, hard-hitting attackers move first and clean house.' },
+    { title:'Screens Offense', score: screens*3, desc:'Set up Reflect and Light Screen to blunt incoming damage, then swing freely behind the protection.' },
+    { title:'Pivot Momentum', score: pivot*1.7, desc:'Chain U-turn, Volt Switch, and similar pivot moves to keep bringing in the best matchup and never give the opponent a free turn.' },
+    { title:'Perish Trap', score: (perishScore=> perishScore)([...allMoves].filter(m=>PERISH_MOVES.has(m)).length*4 + trap*2), desc:'Trap the opponent, stall out Perish Song, and force a knockout they cannot escape.' }
+  ];
+  const scored = isDoubles ? [
+    { title:'Protect & Pressure', score: support*2, desc:'Use Protect and redirection to keep your big hitters safe from spread damage while you pick off one target at a time.' },
+    { title:'Trick Room', score: trickRoom*5, desc:'Flip the speed order so your slow, powerful attackers move first and overwhelm the opposing side before it can react.' },
+    { title: (weatherTitle||'Weather Balance')+' (Doubles)', score: weatherMovesFound.length*2, desc:'Set the weather turn one and immediately capitalize with the teammates built to abuse it, backed by support moves.' },
+    { title:'Full Sweep', score: sweepBoost*1.8 + (avgSpeed>95?2:0), desc:'Set up behind your partner support, then let the sweeper clean through both opposing Pokémon.' },
+    { title:'Tailwind Rush', score: [...allMoves].filter(m=>m==='tailwind').length*5, desc:'Use Tailwind to double your side\u2019s Speed for a few turns and force through damage before the opponent can respond.' }
+  ] : scoredBase;
+
+  scored.sort((a,b)=>b.score-a.score);
+  const top = scored[0].score > 1.5 ? scored[0] : { title:'Balanced Core', desc:'A well-rounded roster with no glaring type holes — react to whatever the opponent brings rather than forcing one game plan.' };
+
+  const lead = team.reduce((best,p)=>{
+    const spd = p.stats.find(x=>x.stat.name==='speed').base_stat;
+    const bestSpd = best.stats.find(x=>x.stat.name==='speed').base_stat;
+    return spd > bestSpd ? p : best;
+  }, team[0]);
+  const leadReason = top.title==='Trick Room' ? 'Actually the slowest reliable Trick Room setter works better as the opener here — but this is the fastest member if Trick Room is down.' : 'Fastest, most flexible opener on the team — sets the tempo before the opponent can react.';
+
+  const threatScores = {};
+  ALL_TYPES.forEach(atkT=>{ let count = 0; team.forEach(p=>{ const types = p.types.map(t=>t.type.name); if(defenseMultiplier(types, atkT) >= 2) count++; }); if(count>0) threatScores[atkT] = count; });
+  const threats = Object.entries(threatScores).sort((a,b)=>b[1]-a[1]).slice(0,3).map(t=>`${displayName(t[0])} attacks (hit ${t[1]} of ${team.length})`);
+
+  const seedNames = team.slice(0, numSeeds).map(p=>displayName(p.name)).join(' + ');
+  const counterNote = targetTypes.length ? ` Picks also leaned toward resisting and hitting ${targetTypes.map(displayName).join('/')}-type Pokémon, since that was set as the matchup to counter.` : '';
+  const why = `Built around ${seedNames}: the picks were weighted to patch the team's type weaknesses, add role variety (sweepers, walls, and utility so the team is not one-dimensional), and lean into the ${top.title} plan once the supporting movepool lined up.${counterNote}`;
+
+  const gameplan = {
+    early: `Lead with ${displayName(lead.name)} to scout the opponent and take an early tempo advantage.`,
+    mid: top.title.includes('Hazard') ? 'Keep hazards up through forced switches, chipping the opposing team with repeated entry damage.'
+       : top.title.includes('Trick Room') ? 'Get a Trick Room setter in safely, flip the speed order, and unload with your hard hitters while it lasts.'
+       : top.title.includes('Weather') || top.title.includes('Sun') || top.title.includes('Rain') || top.title.includes('Sand') || top.title.includes('Snow') ? 'Maintain the weather and pivot into the members that benefit most from it.'
+       : top.title==='Full Sweep' ? 'Wear down the checks to your sweeper, then find a safe turn to set up.'
+       : top.title==='Bulky Balance' ? 'Trade hits patiently, recovering off chip damage and denying the opponent free turns.'
+       : top.title==='Screens Offense' ? 'Get screens up turn one, then attack freely behind the reduced damage.'
+       : top.title==='Pivot Momentum' ? 'Pivot in and out to always have the favorable matchup, chipping the opponent with repeated switch damage.'
+       : top.title==='Perish Trap' ? 'Trap the target, land Perish Song, and prevent it from switching out.'
+       : top.title==='Protect & Pressure' ? 'Use Protect to scout and redirect damage while double-teaming one target down.'
+       : top.title==='Tailwind Rush' ? 'Get Tailwind up and force as much damage through as possible while the Speed boost lasts.'
+       : 'Play reactively, using whichever teammate answers the current threat best.',
+    late: `Close it out with ${displayName(team[team.length-1].name)} or whichever teammate is healthiest, leaning on the threats list above to avoid a bad trade.`
+  };
+  return { title: top.title, desc: top.desc, why, lead: lead.name, leadReason, threats: threats.length?threats.join(', '):'No major shared weaknesses detected — a well-balanced defensive core.', gameplan };
+}
+
+function renderTeamAccordions(teams, format, ruleset, rules, sets, numSeeds){
+  const isDoubles = isDoublesFormat(format);
+  const tbResults = document.getElementById('tbResults');
+  const rulesNote = (ruleset==='none' ? 'None — no extra restrictions beyond normal game legality.'
+    : ruleset==='standard' ? 'Standard — no legendaries or mythicals.'
+    : ruleset==='open' ? 'Legendaries and mythicals encouraged.'
+    : `Custom — ${rules.noLegendary?'no legendaries; ':'legendaries allowed; '}${rules.monoType?'mono-type team; ':''}${rules.requiredTypes.length?'must include '+rules.requiredTypes.map(displayName).join(', ')+'; ':''}`)
+    + (rules.targetTypes && rules.targetTypes.length ? ` Countering ${rules.targetTypes.map(displayName).join('/')}.` : '');
+  const formatLabel = formatLabelFor(format);
+  tbResults.innerHTML = teams.map((team, ti) => buildTeamAccordionHTML(team, ti, isDoubles, formatLabel, rulesNote, numSeeds, rules.targetTypes||[])).join('');
+  teams.forEach((team, ti)=>{
+    const head = document.getElementById(`acc-head-${ti}`);
+    const body = document.getElementById(`acc-body-${ti}`);
+    head.addEventListener('click', ()=>{
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      document.getElementById(`acc-toggle-${ti}`).textContent = isOpen ? 'Expand ▾' : 'Collapse ▴';
+      if(!isOpen && !body.dataset.rendered){
+        body.dataset.rendered = '1';
+        document.getElementById(`coverage-${ti}`).innerHTML = buildCoverageTableHTML(team);
+      }
+    });
+    team.forEach((mon, mi)=>{
+      const card = document.getElementById(`mon-${ti}-${mi}`);
+      if(!card) return;
+      card.addEventListener('click', async ()=>{
+        const detailId = `mon-detail-${ti}-${mi}`;
+        let detail = document.getElementById(detailId);
+        if(detail){ detail.remove(); card.classList.remove('expanded'); return; }
+        document.querySelectorAll(`#team-grid-${ti} .mon-set-detail`).forEach(d=>d.remove());
+        document.querySelectorAll(`#team-grid-${ti} .team-mon`).forEach(m=>m.classList.remove('expanded'));
+        card.classList.add('expanded');
+        const holder = document.createElement('div');
+        holder.className = 'mon-set-detail'; holder.id = detailId;
+        holder.innerHTML = `<div class="status-msg"><div class="spinner"></div>Loading set…</div>`;
+        card.insertAdjacentElement('afterend', holder);
+        try{
+          const displayKey = sets.slugIndex[mon.name];
+          const smogonSets = displayKey ? sets.data[displayKey] : null;
+          let html;
+          if(smogonSets){
+            const entries = Object.entries(smogonSets);
+            const chosen = entries[ti % entries.length];
+            html = `<div class="sets-grid">${renderSmogonSetCard(chosen[0], chosen[1])}</div>`;
+          }else{
+            html = `<div class="sets-grid">${renderGeneratedSetCard(buildGeneratedSet(mon))}</div>`;
+          }
+          holder.innerHTML = html;
+        }catch(e){ holder.innerHTML = `<div class="status-msg error">Could not load a set for this Pokémon.</div>`; }
+      });
+    });
+  });
+  document.getElementById('acc-head-0').click();
+}
+
+function buildTeamAccordionHTML(team, ti, isDoubles, formatLabel, rulesNote, numSeeds, targetTypes){
+  numSeeds = numSeeds || 1;
+  const strat = deriveStrategy(team, isDoubles, numSeeds, targetTypes);
+  const seedsForRationale = team.slice(0, numSeeds);
+  const iconsHTML = team.map(p=>`<img src="${p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default || ''}" alt="${p.name}">`).join('');
+  const teamCardsHTML = team.map((p,i)=>`
+    <div class="team-mon ${i<numSeeds?'seed':''}" id="mon-${ti}-${i}">
+      ${i<numSeeds?'<span class="seed-tag">SEED</span>':''}
+      <img src="${p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default || ''}" alt="${p.name}">
+      <div class="n">${displayName(p.name)}</div>
+      <div class="t">${p.types.map(t=>`<span class="type-badge" style="background:${TYPE_COLORS[t.type.name]}; font-size:9px; padding:3px 8px;">${displayName(t.type.name)}</span>`).join('')}</div>
+      <div class="role">${roleForMon(p)}</div>
+      ${i>=numSeeds?`<div class="rationale">${rationaleForPick(seedsForRationale, p)}</div>`:''}
+    </div>`).join('');
+
+  return `
+  <div class="team-acc">
+    <div class="team-acc-head" id="acc-head-${ti}">
+      <div class="team-acc-title"><span class="team-acc-num">TEAM ${ti+1}</span><h4>${strat.title}</h4><div class="team-acc-mini-icons">${iconsHTML}</div></div>
+      <div class="team-acc-toggle" id="acc-toggle-${ti}">Expand ▾</div>
+    </div>
+    <div class="team-acc-body" id="acc-body-${ti}">
+      <div class="strategy-card">
+        <div class="strategy-eyebrow">${formatLabel} · Suggested Game Plan</div>
+        <div class="strategy-title">${strat.title}</div>
+        <div class="strategy-desc">${strat.desc}</div>
+        <div class="strategy-why">${strat.why}</div>
+        <div class="strategy-grid">
+          <div class="strategy-item"><h5>Suggested Lead</h5><p>${displayName(strat.lead)} — ${strat.leadReason}</p></div>
+          <div class="strategy-item"><h5>Watch out for</h5><p>${strat.threats}</p></div>
+          <div class="strategy-item"><h5>Ruleset</h5><p>${rulesNote}</p></div>
+          <div class="strategy-item"><h5>Format</h5><p>${formatLabel}</p></div>
+        </div>
+        <div class="gameplan">
+          <div><h6>Early</h6><p>${strat.gameplan.early}</p></div>
+          <div><h6>Mid</h6><p>${strat.gameplan.mid}</p></div>
+          <div><h6>Late</h6><p>${strat.gameplan.late}</p></div>
+        </div>
+      </div>
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:15px; margin-bottom:4px;">Roster</h3>
+      <div class="sub" style="font-size:12px; color:var(--text-dim); margin-bottom:12px;">Tap any teammate to see its competitive set.</div>
+      <div class="team-grid" id="team-grid-${ti}">${teamCardsHTML}</div>
+      <div class="coverage-panel"><div id="coverage-${ti}"><div class="status-msg"><div class="spinner"></div>Loading coverage…</div></div></div>
+    </div>
+  </div>`;
+}
+
+function buildCoverageTableHTML(team){
+  const header = ALL_TYPES.map(t=>`<th class="col-h" style="background:${TYPE_COLORS[t]}">${displayName(t)}</th>`).join('');
+  const rows = team.map(p=>{
+    const types = p.types.map(t=>t.type.name);
+    const cells = ALL_TYPES.map(atkT=>{
+      const m = defenseMultiplier(types, atkT);
+      const {bg,fg,label} = covCellStyle(m);
+      return `<td><div class="cov-cell" style="background:${bg}; color:${fg}; display:flex; align-items:center; justify-content:center;">${label}</div></td>`;
+    }).join('');
+    return `<tr><th class="row-h">${displayName(p.name)}</th>${cells}</tr>`;
+  }).join('');
+  return `
+    <h3>Team Type Coverage</h3>
+    <div class="sub">Defensive multiplier for each teammate against every attacking type.</div>
+    <table class="cov-table"><thead><tr><th></th>${header}</tr></thead><tbody>${rows}</tbody></table>
+    <div class="cov-legend">
+      <span><span class="cov-swatch" style="background:#4a1f24"></span>4× weak</span>
+      <span><span class="cov-swatch" style="background:#5c2a2f"></span>2× weak</span>
+      <span><span class="cov-swatch" style="background:#241f30"></span>neutral</span>
+      <span><span class="cov-swatch" style="background:#2c2350"></span>resists</span>
+      <span><span class="cov-swatch" style="background:#3a2d66"></span>immune</span>
+    </div>`;
+}
+function covCellStyle(m){
+  if(m===0) return {bg:'#3a2d66', fg:'#c9b8ff', label:'0×'};
+  if(m===0.25) return {bg:'#241f45', fg:'#9b8fd9', label:'¼×'};
+  if(m===0.5) return {bg:'#2c2350', fg:'#b3a3ec', label:'½×'};
+  if(m===1) return {bg:'#241f30', fg:'#6a6280', label:'1×'};
+  if(m===2) return {bg:'#5c2a2f', fg:'#ffb1b1', label:'2×'};
+  if(m===4) return {bg:'#4a1f24', fg:'#ff8f8f', label:'4×'};
+  return {bg:'#241f30', fg:'#6a6280', label:m+'×'};
+}
+
+/* ============================================================
+   TOOLS TAB
+   ============================================================ */
+let toolsInitialized = false;
+function initToolsOnce(){
+  if(toolsInitialized) return;
+  toolsInitialized = true;
+  document.getElementById('typeMatrixContainer').innerHTML = buildTypeMatrixHTML();
+  document.getElementById('natureGridContainer').innerHTML = buildNatureGridHTML();
+  loadItemsList();
+  loadAbilitiesList();
+}
+document.querySelectorAll('.tools-subtabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tools-subtabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tool-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById(btn.dataset.tool).classList.add('active');
+  });
+});
+
+function buildTypeMatrixHTML(){
+  const header = ALL_TYPES.map(t=>`<th class="col-h" style="background:${TYPE_COLORS[t]}">${displayName(t)}</th>`).join('');
+  const rows = ALL_TYPES.map(atkT=>{
+    const cells = ALL_TYPES.map(defT=>{
+      const m = multiplier(atkT, defT);
+      const {bg,fg,label} = covCellStyle(m);
+      return `<td><div class="matrix-cell" style="background:${bg}; color:${fg}; display:flex; align-items:center; justify-content:center;">${m===1?'':label}</div></td>`;
+    }).join('');
+    return `<tr><th class="row-h" style="background:${TYPE_COLORS[atkT]}">${displayName(atkT)}</th>${cells}</tr>`;
+  }).join('');
+  return `<table class="type-matrix"><thead><tr><th class="corner"></th>${header}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function buildNatureGridHTML(){
+  const header = NATURE_STAT_ORDER.map(s=>`<th>−${s}</th>`).join('');
+  const rows = NATURE_GRID.map((row,ri)=>{
+    const cells = row.map((n,ci)=> `<td class="nature-cell ${ri===ci?'neutral':''}">${n}</td>`).join('');
+    return `<tr><th>+${NATURE_STAT_ORDER[ri]}</th>${cells}</tr>`;
+  }).join('');
+  return `<table class="nature-grid"><thead><tr><th class="corner"></th>${header}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+let allItemsList = null, allAbilitiesList = null;
+async function loadItemsList(){
+  const container = document.getElementById('itemList');
+  try{
+    if(!allItemsList){
+      const data = await fetchJSON('https://pokeapi.co/api/v2/item?limit=2000');
+      allItemsList = data.results;
+    }
+    renderItemList(allItemsList);
+    document.getElementById('itemSearch').addEventListener('input', e=>{
+      const q = e.target.value.trim().toLowerCase();
+      renderItemList(allItemsList.filter(i=>i.name.includes(q.replace(/\s+/g,'-')) || displayName(i.name).toLowerCase().includes(q)));
+    });
+  }catch(e){ container.innerHTML = `<div class="status-msg error">Could not load the item list right now.</div>`; }
+}
+function renderItemList(items){
+  const container = document.getElementById('itemList');
+  const slice = items.slice(0, 400);
+  container.innerHTML = slice.map(i=>`
+    <div class="list-row" data-item="${i.name}">
+      <div class="list-row-head"><b>${displayName(i.name)}</b><span class="cat">tap for effect</span></div>
+    </div>`).join('') || `<div class="status-msg">No items match your search.</div>`;
+  container.querySelectorAll('.list-row').forEach(row=>{
+    row.addEventListener('click', async ()=>{
+      let detail = row.querySelector('.list-row-detail');
+      if(detail){ detail.remove(); return; }
+      const holder = document.createElement('div');
+      holder.className = 'list-row-detail';
+      holder.innerHTML = 'Loading…';
+      row.appendChild(holder);
+      try{
+        const d = await fetchJSON(`https://pokeapi.co/api/v2/item/${row.dataset.item}`);
+        const eng = d.effect_entries.find(e=>e.language.name==='en');
+        holder.innerHTML = eng ? eng.short_effect : 'No effect text available for this item.';
+      }catch(e){ holder.innerHTML = 'Could not load effect text.'; }
+    });
+  });
+}
+
+async function loadAbilitiesList(){
+  const container = document.getElementById('abilityList');
+  try{
+    if(!allAbilitiesList){
+      const data = await fetchJSON('https://pokeapi.co/api/v2/ability?limit=400');
+      allAbilitiesList = data.results;
+    }
+    renderAbilityList(allAbilitiesList);
+    document.getElementById('abilitySearch').addEventListener('input', e=>{
+      const q = e.target.value.trim().toLowerCase();
+      renderAbilityList(allAbilitiesList.filter(a=>a.name.includes(q.replace(/\s+/g,'-')) || displayName(a.name).toLowerCase().includes(q)));
+    });
+  }catch(e){ container.innerHTML = `<div class="status-msg error">Could not load the ability list right now.</div>`; }
+}
+function renderAbilityList(abilities){
+  const container = document.getElementById('abilityList');
+  container.innerHTML = abilities.map(a=>`
+    <div class="list-row" data-ability="${a.name}">
+      <div class="list-row-head"><b>${displayName(a.name)}</b><span class="cat">tap to expand</span></div>
+    </div>`).join('') || `<div class="status-msg">No abilities match your search.</div>`;
+  container.querySelectorAll('.list-row').forEach(row=>{
+    row.addEventListener('click', async ()=>{
+      let detail = row.querySelector('.list-row-detail');
+      if(detail){ detail.remove(); return; }
+      const holder = document.createElement('div');
+      holder.className = 'list-row-detail';
+      holder.innerHTML = 'Loading…';
+      row.appendChild(holder);
+      try{
+        const d = await fetchJSON(`https://pokeapi.co/api/v2/ability/${row.dataset.ability}`);
+        const eng = d.effect_entries.find(e=>e.language.name==='en');
+        const effectText = eng ? eng.short_effect : 'No effect text available.';
+        const chips = d.pokemon.slice(0,60).map(p=>`<span class="pokemon-chip ${p.is_hidden?'hidden-ab':''}">${displayName(p.pokemon.name)}</span>`).join('');
+        holder.innerHTML = `<div>${effectText}</div><div class="pokemon-chip-list">${chips}</div>${d.pokemon.length>60?`<div style="margin-top:8px; font-size:11px; color:var(--text-dim);">+${d.pokemon.length-60} more</div>`:''}`;
+      }catch(e){ holder.innerHTML = 'Could not load ability details.'; }
+    });
+  });
+}
+</script>
+</body>
+</html>
